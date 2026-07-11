@@ -363,3 +363,51 @@ export interface MilkTakenReportBiProductFormData {
   chemist_name?: string;
   qc_manager_name?: string;
 }
+
+// ─── Butter Milk Analysis Records ─────────────────────────────────────────────
+
+export interface ButtermilkAnalysisRecord {
+  id: number;
+  date: string;
+  shift: string;
+  type_of_sample: string;
+  testing_time: string;
+  batch_no: string;
+  packing_date: string;
+  expiry_date: string;
+  flavour: string;
+  taste: string;
+  fat_percent: string;
+  degree: string;
+  acidity_percent: string;
+  protein_percent: string;
+  adulteration: string;
+  remark: string;
+  sign_name: string;
+  chemist_name: string;
+  quality_incharge_name: string;
+  created_by?: number;
+  created_by_name?: string;
+  created_at: string;
+}
+
+export interface ButtermilkAnalysisFormData {
+  date: string;
+  shift: string;
+  type_of_sample: string;
+  testing_time: string;
+  batch_no: string;
+  packing_date: string;
+  expiry_date: string;
+  flavour: string;
+  taste: string;
+  fat_percent: string;
+  degree: string;
+  acidity_percent: string;
+  protein_percent: string;
+  adulteration: string;
+  remark: string;
+  sign_name: string;
+  chemist_name: string;
+  quality_incharge_name: string;
+}

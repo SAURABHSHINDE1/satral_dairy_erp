@@ -15,6 +15,7 @@ import FinalBiProductReportPage from './pages/FinalBiProductReportPage';
 import RawBulkMilkTestingPage from './pages/RawBulkMilkTestingPage';
 import PackingMilkReportPage from './pages/PackingMilkReportPage';
 import MilkTakenReportByProduct from './pages/MilkTakenReportByProduct';
+import ButtermilkAnalysisRecordPage from './pages/ButtermilkAnalysisRecordPage';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { useUIStore } from './store/ui.store';
 
@@ -80,6 +81,7 @@ function App() {
             <Route path="raw-bulk-milk" element={<RawBulkMilkTestingPage />} />
             <Route path="packing-milk-report" element={<PackingMilkReportPage />} />
             <Route path="milk-taken-report-bi-product" element={<MilkTakenReportByProduct />} />
+            <Route path="buttermilk-analysis-record" element={<ButtermilkAnalysisRecordPage />} />
             <Route path="reports" element={<ReportsPage />} />
             <Route path="users" element={<UsersPage />} />
             <Route path="activity-logs" element={<ActivityLogsPage />} />
