@@ -8,11 +8,17 @@ class MilkTakenReportBiProductController {
         date_from:    req.query.date_from,
         date_to:      req.query.date_to,
         product_name: req.query.product_name,
-        limit:        req.query.limit  || 200,
-        offset:       req.query.offset || 0,
+        page :        parseInt(req.query.page)  || 1,
+        limit:        parseInt(req.query.limit) || 25,
       };
-      const records = await milkTakenReportBiProductService.getAllRecords(filters);
-      res.json({ success: true, data: records });
+      const result = await milkTakenReportBiProductService.getAllRecords(filters);
+      res.json({
+        success   : true,
+        data      : result.data,
+        total     : result.total,
+        page      : result.page,
+        totalPages: result.totalPages,
+      });
     } catch (error) { next(error); }
   }
 

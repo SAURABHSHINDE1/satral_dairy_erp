@@ -1,4 +1,22 @@
-const pool = require('../config/database.config');
+const pool         = require('../config/database.config');
+const { paginate } = require('../utils/pagination.helper');
+
+// ─── Explicit column list for list queries (avoids SELECT *) ─────────────────────
+const SELECT_COLS = `
+  tr.id, tr.date, tr.tank_number, tr.batch_number,
+  tr.milk_quantity, tr.fat_percentage, tr.snf_percentage, tr.temperature,
+  tr.milk_type, tr.tank_release_time, tr.packing_machine_detail, tr.release_time,
+  tr.remarks, tr.status,
+  tr.process_operator_id, tr.lab_incharge_id, tr.created_at,
+  u1.full_name AS operator_name,
+  u2.full_name AS lab_incharge_name
+`.trim();
+
+const FROM_JOINS = `
+  FROM tank_records tr
+  LEFT JOIN users u1 ON tr.process_operator_id = u1.id
+  LEFT JOIN users u2 ON tr.lab_incharge_id      = u2.id
+`.trim();
 
 const mapRecord = (row) => {
   if (!row) return null;
@@ -51,57 +69,32 @@ class TankRepository {
     return mapRecord(rows[0]);
   }
 
+  /**
+   * List tank records with pagination.
+   * @param {Object} filters - { status?, date_from?, date_to?, process_operator_id?, tank_number?, page?, limit? }
+   * @returns {{ data, total, page, totalPages }}
+   */
   async findAll(filters = {}) {
-    let query = `
-      SELECT tr.*, 
-        u1.full_name as operator_name,
-        u2.full_name as lab_incharge_name
-      FROM tank_records tr
-      LEFT JOIN users u1 ON tr.process_operator_id = u1.id
-      LEFT JOIN users u2 ON tr.lab_incharge_id = u2.id
-      WHERE 1=1
-    `;
+    const where  = [];
     const params = [];
 
-    if (filters.status) {
-      query += ' AND tr.status = ?';
-      params.push(filters.status);
-    }
+    if (filters.status)              { where.push('tr.status = ?');                  params.push(filters.status); }
+    if (filters.date_from)           { where.push('tr.date >= ?');                   params.push(filters.date_from); }
+    if (filters.date_to)             { where.push('tr.date <= ?');                   params.push(filters.date_to); }
+    if (filters.process_operator_id) { where.push('tr.process_operator_id = ?');    params.push(filters.process_operator_id); }
+    if (filters.tank_number)         { where.push('tr.tank_number LIKE ?');         params.push(`%${filters.tank_number}%`); }
 
-    if (filters.date_from) {
-      query += ' AND tr.date >= ?';
-      params.push(filters.date_from);
-    }
+    const result = await paginate({
+      pool,
+      select : SELECT_COLS,
+      from   : FROM_JOINS,
+      where, params,
+      orderBy: 'ORDER BY tr.date DESC, tr.created_at DESC',
+      page   : filters.page,
+      limit  : filters.limit,
+    });
 
-    if (filters.date_to) {
-      query += ' AND tr.date <= ?';
-      params.push(filters.date_to);
-    }
-
-    if (filters.process_operator_id) {
-      query += ' AND tr.process_operator_id = ?';
-      params.push(filters.process_operator_id);
-    }
-
-    if (filters.tank_number) {
-      query += ' AND tr.tank_number LIKE ?';
-      params.push(`%${filters.tank_number}%`);
-    }
-
-    query += ' ORDER BY tr.created_at DESC';
-
-    if (filters.limit) {
-      query += ' LIMIT ?';
-      params.push(filters.limit);
-    }
-
-    if (filters.offset) {
-      query += ' OFFSET ?';
-      params.push(filters.offset);
-    }
-
-    const [rows] = await pool.query(query, params);
-    return rows.map(mapRecord);
+    return { ...result, data: result.data.map(mapRecord) };
   }
 
   async create(tankData) {

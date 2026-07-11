@@ -4,10 +4,19 @@ class ButtermilkAnalysisRecordController {
   async getAllRecords(req, res, next) {
     try {
       const filters = {
-        date: req.query.date,
+        date  : req.query.date,
+        shift : req.query.shift,
+        page  : parseInt(req.query.page)  || 1,
+        limit : parseInt(req.query.limit) || 25,
       };
-      const records = await buttermilkAnalysisRecordService.getAllRecords(filters);
-      res.json({ success: true, data: records });
+      const result = await buttermilkAnalysisRecordService.getAllRecords(filters);
+      res.json({
+        success   : true,
+        data      : result.data,
+        total     : result.total,
+        page      : result.page,
+        totalPages: result.totalPages,
+      });
     } catch (error) { next(error); }
   }
 

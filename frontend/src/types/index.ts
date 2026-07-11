@@ -88,6 +88,15 @@ export interface ApiResponse<T> {
   data: T;
 }
 
+export interface PaginatedApiResponse<T> {
+  success: boolean;
+  message?: string;
+  data: T[];
+  total: number;
+  page: number;
+  totalPages: number;
+}
+
 export interface AuthResponse {
   user: User;
   accessToken: string;

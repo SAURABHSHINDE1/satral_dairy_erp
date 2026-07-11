@@ -4,20 +4,23 @@ class TankController {
   async getAllTankRecords(req, res, next) {
     try {
       const filters = {
-        status: req.query.status,
-        date_from: req.query.date_from,
-        date_to: req.query.date_to,
+        status:              req.query.status,
+        date_from:           req.query.date_from,
+        date_to:             req.query.date_to,
         process_operator_id: req.query.process_operator_id,
-        tank_number: req.query.tank_number,
-        limit: parseInt(req.query.limit) || 50,
-        offset: parseInt(req.query.offset) || 0
+        tank_number:         req.query.tank_number,
+        page :               parseInt(req.query.page)  || 1,
+        limit:               parseInt(req.query.limit) || 25,
       };
 
-      const records = await tankService.getAllTankRecords(filters);
+      const result = await tankService.getAllTankRecords(filters);
 
       res.json({
-        success: true,
-        data: records
+        success   : true,
+        data      : result.data,
+        total     : result.total,
+        page      : result.page,
+        totalPages: result.totalPages,
       });
     } catch (error) {
       next(error);

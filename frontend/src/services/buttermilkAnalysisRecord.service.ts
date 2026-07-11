@@ -1,11 +1,14 @@
 import api from './api';
-import type { ApiResponse, ButtermilkAnalysisRecord, ButtermilkAnalysisFormData } from '../types';
+import type { PaginatedApiResponse, ButtermilkAnalysisRecord, ButtermilkAnalysisFormData } from '../types';
 
 export const buttermilkAnalysisRecordService = {
   async getAll(filters?: {
     date?: string;
-  }): Promise<ApiResponse<ButtermilkAnalysisRecord[]>> {
-    const response = await api.get<ApiResponse<ButtermilkAnalysisRecord[]>>(
+    shift?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<PaginatedApiResponse<ButtermilkAnalysisRecord>> {
+    const response = await api.get<PaginatedApiResponse<ButtermilkAnalysisRecord>>(
       '/buttermilk-analysis-records',
       { params: filters }
     );

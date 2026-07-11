@@ -1,6 +1,22 @@
-const pool = require('../config/database.config');
+const pool         = require('../config/database.config');
+const { paginate } = require('../utils/pagination.helper');
 
-// ─── Map numeric strings to JS numbers ────────────────────────────────────────
+// ─── Explicit column list (avoids SELECT *) ───────────────────────────────────
+const SELECT_COLS = `
+  r.id, r.date, r.testing_time, r.tank_no, r.batch_no, r.packing_head,
+  r.product_name, r.temp_celsius, r.acidity_percent, r.alcohol_result,
+  r.fat_percent, r.clr, r.snf_percent, r.phosphatase_test,
+  r.br, r.ph, r.ts, r.protein_percent, r.remark,
+  r.chemist_name, r.quality_incharge_name,
+  r.created_by, r.created_at,
+  u.full_name AS created_by_name
+`.trim();
+
+const FROM_JOINS = `
+  FROM packing_milk_reports r
+  LEFT JOIN users u ON r.created_by = u.id
+`.trim();
+
 const mapRecord = (row) => {
   if (!row) return null;
   return {
@@ -19,50 +35,31 @@ const mapRecord = (row) => {
 
 class PackingMilkReportRepository {
   // ─── findAll ──────────────────────────────────────────────────────────────
+  /**
+   * @param {Object} filters - { date?, date_from?, date_to?, product_name?, tank_no?, page?, limit? }
+   * @returns {{ data, total, page, totalPages }}
+   */
   async findAll(filters = {}) {
-    let query = `
-      SELECT r.*,
-             u.full_name AS created_by_name
-      FROM packing_milk_reports r
-      LEFT JOIN users u ON r.created_by = u.id
-      WHERE 1=1
-    `;
+    const where  = [];
     const params = [];
 
-    if (filters.date) {
-      query += ' AND r.date = ?';
-      params.push(filters.date);
-    }
-    if (filters.date_from) {
-      query += ' AND r.date >= ?';
-      params.push(filters.date_from);
-    }
-    if (filters.date_to) {
-      query += ' AND r.date <= ?';
-      params.push(filters.date_to);
-    }
-    if (filters.product_name) {
-      query += ' AND r.product_name LIKE ?';
-      params.push(`%${filters.product_name}%`);
-    }
-    if (filters.tank_no) {
-      query += ' AND r.tank_no LIKE ?';
-      params.push(`%${filters.tank_no}%`);
-    }
+    if (filters.date)         { where.push('r.date = ?');              params.push(filters.date); }
+    if (filters.date_from)    { where.push('r.date >= ?');             params.push(filters.date_from); }
+    if (filters.date_to)      { where.push('r.date <= ?');             params.push(filters.date_to); }
+    if (filters.product_name) { where.push('r.product_name LIKE ?');  params.push(`%${filters.product_name}%`); }
+    if (filters.tank_no)      { where.push('r.tank_no LIKE ?');       params.push(`%${filters.tank_no}%`); }
 
-    query += ' ORDER BY r.date DESC, r.testing_time ASC, r.created_at DESC';
+    const result = await paginate({
+      pool,
+      select : SELECT_COLS,
+      from   : FROM_JOINS,
+      where, params,
+      orderBy: 'ORDER BY r.date DESC, r.testing_time ASC, r.created_at DESC',
+      page   : filters.page,
+      limit  : filters.limit,
+    });
 
-    if (filters.limit) {
-      query += ' LIMIT ?';
-      params.push(parseInt(filters.limit));
-    }
-    if (filters.offset) {
-      query += ' OFFSET ?';
-      params.push(parseInt(filters.offset));
-    }
-
-    const [rows] = await pool.query(query, params);
-    return rows.map(mapRecord);
+    return { ...result, data: result.data.map(mapRecord) };
   }
 
   // ─── findById ─────────────────────────────────────────────────────────────
