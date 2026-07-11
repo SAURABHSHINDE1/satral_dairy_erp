@@ -1,0 +1,122 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-background text-text-primary font-sans antialiased;
+  }
+
+  /* Dark mode overrides */
+  .dark body {
+    @apply bg-secondary-900 text-secondary-100;
+  }
+
+  .dark .bg-white {
+    @apply bg-secondary-800;
+  }
+
+  .dark .bg-background {
+    @apply bg-secondary-900;
+  }
+
+  .dark .border-secondary-200 {
+    @apply border-secondary-700;
+  }
+
+  .dark .border-secondary-100 {
+    @apply border-secondary-700;
+  }
+
+  .dark .bg-secondary-50 {
+    @apply bg-secondary-800;
+  }
+
+  .dark .text-text-primary {
+    @apply text-secondary-100;
+  }
+
+  .dark .text-text-secondary {
+    @apply text-secondary-400;
+  }
+
+  .dark .hover\:bg-secondary-100:hover {
+    @apply bg-secondary-700;
+  }
+
+  .dark .hover\:bg-secondary-50:hover {
+    @apply bg-secondary-800;
+  }
+
+  .dark input,
+  .dark select,
+  .dark textarea {
+    @apply bg-secondary-800 border-secondary-600 text-secondary-100;
+  }
+
+  .dark input::placeholder,
+  .dark textarea::placeholder {
+    @apply text-secondary-500;
+  }
+
+  .dark .shadow-soft {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .dark .shadow-medium {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/80 backdrop-blur-lg border border-white/20;
+  }
+  
+  .glass-dark {
+    @apply bg-secondary-900/80 backdrop-blur-lg border border-secondary-700/20;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-secondary-100;
+}
+
+.dark ::-webkit-scrollbar-track {
+  @apply bg-secondary-800;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-secondary-300 rounded-lg;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  @apply bg-secondary-600 rounded-lg;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-secondary-400;
+}
+
+/* Smooth transitions */
+* {
+  transition-property: color, background-color, border-color;
+  transition-timing-function: ease;
+  transition-duration: 200ms;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    @apply bg-white text-black;
+  }
+}
