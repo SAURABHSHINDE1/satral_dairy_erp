@@ -89,7 +89,7 @@ export default function LoginPage() {
 
           <div className="mt-6 text-center">
             <p className="text-sm text-text-secondary">
-              Default credentials: admin / Admin@123
+              {/* Default credentials: admin / Admin@123 */}
             </p>
           </div>
         </div>
