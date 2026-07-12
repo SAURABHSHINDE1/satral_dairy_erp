@@ -16,6 +16,7 @@ import {
   Package,
   TestTube2,
   X,
+  Scale,
 } from 'lucide-react';
 import { useUIStore } from '../store/ui.store';
 import { useAuthStore } from '../store/auth.store';
@@ -31,6 +32,7 @@ const menuItems = [
   { path: '/packing-milk-report',          label: 'Packing Milk Report',           icon: Package    },
   { path: '/milk-taken-report-bi-product', label: 'Milk Taken Report (Bi-Product)', icon: TestTube2  },
   { path: '/buttermilk-analysis-record',   label: 'Buttermilk Analysis',           icon: Milk       },
+  { path: '/pouch-weighing-log',           label: 'Pouch Weighing Log',            icon: Scale      },
   { path: '/reports', label: 'Reports', icon: FileText },
   { path: '/users', label: 'Users', icon: Users, roles: ['admin'] },
   { path: '/activity-logs', label: 'Activity Logs', icon: Activity, roles: ['admin'] },

@@ -20,6 +20,7 @@ const RawBulkMilkTestingPage = React.lazy(() => import('./pages/RawBulkMilkTesti
 const PackingMilkReportPage = React.lazy(() => import('./pages/PackingMilkReportPage'));
 const MilkTakenReportByProduct = React.lazy(() => import('./pages/MilkTakenReportByProduct'));
 const ButtermilkAnalysisRecordPage = React.lazy(() => import('./pages/ButtermilkAnalysisRecordPage'));
+const PouchWeighingLogSheet = React.lazy(() => import('./pages/PouchWeighingLogSheet'));
 
 // ─── Loading Spinner for Suspense ────────────────────────────────────────────
 function PageLoader() {
@@ -97,6 +98,7 @@ function App() {
               <Route path="packing-milk-report" element={<PackingMilkReportPage />} />
               <Route path="milk-taken-report-bi-product" element={<MilkTakenReportByProduct />} />
               <Route path="buttermilk-analysis-record" element={<ButtermilkAnalysisRecordPage />} />
+              <Route path="pouch-weighing-log" element={<PouchWeighingLogSheet />} />
               <Route path="reports" element={<ReportsPage />} />
               <Route path="users" element={<UsersPage />} />
               <Route path="activity-logs" element={<ActivityLogsPage />} />

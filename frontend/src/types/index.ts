@@ -400,6 +400,7 @@ export interface ButtermilkAnalysisRecord {
   created_at: string;
 }
 
+
 export interface ButtermilkAnalysisFormData {
   date: string;
   shift: string;
@@ -420,3 +421,44 @@ export interface ButtermilkAnalysisFormData {
   chemist_name: string;
   quality_incharge_name: string;
 }
+
+// ─── Pouch Weighing Log Sheet ──────────────────────────────────────────────────
+
+export interface PouchWeighingReading {
+  id?: number;
+  timing: string;            // e.g. "09:00", "09:30" … "20:00"
+  weight_reading_ml: number | null;
+}
+
+export interface PouchWeighingHead {
+  id?: number;
+  head_name: string;         // A | B | C | D | E | F | G | H | I
+  batch_release_tank_number?: string | null;
+  operator_name?: string | null;
+  batch_no?: string | null;
+  mfg_date?: string | null;
+  exp_date?: string | null;
+  pack_size_ml?: number | null;
+  target_weight_min_ml?: number | null;
+  target_weight_max_ml?: number | null;
+  readings: PouchWeighingReading[];
+}
+
+export interface PouchWeighingSession {
+  id: number;
+  date: string;
+  packing_supervisor_name?: string | null;
+  quality_incharge_name?: string | null;
+  heads: PouchWeighingHead[];
+  created_by?: number;
+  created_by_name?: string;
+  created_at: string;
+}
+
+export interface PouchWeighingSessionFormData {
+  date: string;
+  packing_supervisor_name?: string;
+  quality_incharge_name?: string;
+  heads: PouchWeighingHead[];
+}
+

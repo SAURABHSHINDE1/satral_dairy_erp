@@ -1,5 +1,5 @@
 import api from './api';
-import type { PaginatedApiResponse, ButtermilkAnalysisRecord, ButtermilkAnalysisFormData } from '../types';
+import type { PaginatedApiResponse, ButtermilkAnalysisRecord, ButtermilkAnalysisFormData, ApiResponse } from '../types';
 
 export const buttermilkAnalysisRecordService = {
   async getAll(filters?: {

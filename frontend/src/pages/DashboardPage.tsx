@@ -72,7 +72,7 @@ export default function DashboardPage() {
   const qualityCards = [
     {
       title: 'Total Milk Quantity',
-      value: `${Number(stats.total_milk_quantity || 0).toFixed(2)} L`,
+      value: `${Number(stats.total_milk_quantity || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} L`,
       icon: Droplets,
       color: 'primary',
     },
@@ -156,13 +156,13 @@ export default function DashboardPage() {
               transition={{ delay: 0.4 + index * 0.1 }}
             >
               <Card className="hover:shadow-medium transition-shadow duration-300">
-                <div className="flex items-center gap-4">
-                  <div className={`p-3 rounded-lg ${colorClasses[card.color as keyof typeof colorClasses]}`}>
-                    <Icon className="w-6 h-6" />
+                <div className="flex items-start justify-between">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-text-secondary truncate">{card.title}</p>
+                    <p className="text-xl sm:text-2xl font-bold text-text-primary mt-2 break-all">{card.value}</p>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-text-secondary">{card.title}</p>
-                    <p className="text-2xl font-bold text-text-primary mt-1">{card.value}</p>
+                  <div className={`p-3 rounded-lg flex-shrink-0 ${colorClasses[card.color as keyof typeof colorClasses]}`}>
+                    <Icon className="w-6 h-6" />
                   </div>
                 </div>
               </Card>
