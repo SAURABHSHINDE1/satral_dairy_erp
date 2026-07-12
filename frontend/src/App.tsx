@@ -21,6 +21,7 @@ const PackingMilkReportPage = React.lazy(() => import('./pages/PackingMilkReport
 const MilkTakenReportByProduct = React.lazy(() => import('./pages/MilkTakenReportByProduct'));
 const ButtermilkAnalysisRecordPage = React.lazy(() => import('./pages/ButtermilkAnalysisRecordPage'));
 const PouchWeighingLogSheet = React.lazy(() => import('./pages/PouchWeighingLogSheet'));
+const SearchPage = React.lazy(() => import('./pages/SearchPage'));
 
 // ─── Loading Spinner for Suspense ────────────────────────────────────────────
 function PageLoader() {
@@ -103,6 +104,7 @@ function App() {
               <Route path="users" element={<UsersPage />} />
               <Route path="activity-logs" element={<ActivityLogsPage />} />
               <Route path="settings" element={<SettingsPage />} />
+              <Route path="search" element={<SearchPage />} />
             </Route>
           </Routes>
         </Suspense>

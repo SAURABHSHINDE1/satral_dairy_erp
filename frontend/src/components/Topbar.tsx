@@ -76,7 +76,7 @@ export function Topbar() {
     e.preventDefault();
     const trimmed = searchValue.trim();
     if (trimmed) {
-      navigate(`/tank-records?search=${encodeURIComponent(trimmed)}`);
+      navigate(`/search?q=${encodeURIComponent(trimmed)}`);
       setSearchValue('');
     }
   };
@@ -139,7 +139,7 @@ export function Topbar() {
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
               onKeyDown={(e) => e.key === 'Escape' && setSearchValue('')}
-              placeholder={isMobile ? "Search..." : "Search tank records... (Ctrl+K)"}
+              placeholder={isMobile ? "Search..." : "Search all records... (Ctrl+K)"}
               className="w-full pl-10 pr-16 py-2 rounded-lg border border-secondary-300 bg-white dark:bg-secondary-800 dark:border-secondary-600 dark:text-secondary-100 dark:placeholder:text-secondary-500 text-text-primary placeholder:text-secondary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
             />
             {searchValue ? (

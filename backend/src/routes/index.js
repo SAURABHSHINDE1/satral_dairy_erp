@@ -14,6 +14,7 @@ const packingMilkReportRoutes = require('./packingMilkReport.routes');
 const milkTakenReportBiProductRoutes = require('./milkTakenReportBiProduct.routes');
 const buttermilkAnalysisRecordRoutes = require('./buttermilkAnalysisRecord.routes');
 const pouchWeighingRoutes             = require('./pouchWeighing.routes');
+const searchRoutes                    = require('./search.routes');
 
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
@@ -28,6 +29,7 @@ router.use('/packing-milk-reports', packingMilkReportRoutes);
 router.use('/milk-taken-reports-bi-product', milkTakenReportBiProductRoutes);
 router.use('/buttermilk-analysis-records', buttermilkAnalysisRecordRoutes);
 router.use('/pouch-weighing-sessions',    pouchWeighingRoutes);
+router.use('/search',                  searchRoutes);
 
 
 router.get('/health', (req, res) => {
