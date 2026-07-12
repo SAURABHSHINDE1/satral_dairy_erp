@@ -217,7 +217,7 @@ class PouchWeighingRepository {
       await conn.beginTransaction();
 
       // 1. Update session header fields
-      const updatable = ['date', 'packing_supervisor_name', 'quality_incharge_name'];
+      const updatable = ['date', 'packing_supervisor_name', 'quality_incharge_name', 'status'];
       const fields = [];
       const values = [];
       for (const field of updatable) {

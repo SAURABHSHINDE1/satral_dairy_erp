@@ -2,28 +2,28 @@ import api from './api';
 import type { ApiResponse } from '../types';
 
 export const reportService = {
-  async getDailyReport(date: string): Promise<ApiResponse<any>> {
-    const response = await api.get<ApiResponse<any>>('/reports/daily', { params: { date } });
+  async getDailyReport(date: string, moduleName?: string): Promise<ApiResponse<any>> {
+    const response = await api.get<ApiResponse<any>>('/reports/daily', { params: { date, module: moduleName } });
     return response.data;
   },
 
-  async getWeeklyReport(startDate: string, endDate: string): Promise<ApiResponse<any>> {
+  async getWeeklyReport(startDate: string, endDate: string, moduleName?: string): Promise<ApiResponse<any>> {
     const response = await api.get<ApiResponse<any>>('/reports/weekly', {
-      params: { start_date: startDate, end_date: endDate },
+      params: { start_date: startDate, end_date: endDate, module: moduleName },
     });
     return response.data;
   },
 
-  async getMonthlyReport(year: string, month: string): Promise<ApiResponse<any>> {
+  async getMonthlyReport(year: string, month: string, moduleName?: string): Promise<ApiResponse<any>> {
     const response = await api.get<ApiResponse<any>>('/reports/monthly', {
-      params: { year, month },
+      params: { year, month, module: moduleName },
     });
     return response.data;
   },
 
-  async getCustomReport(startDate: string, endDate: string, filters?: any): Promise<ApiResponse<any>> {
+  async getCustomReport(startDate: string, endDate: string, filters?: any, moduleName?: string): Promise<ApiResponse<any>> {
     const response = await api.get<ApiResponse<any>>('/reports/custom', {
-      params: { start_date: startDate, end_date: endDate, ...filters },
+      params: { start_date: startDate, end_date: endDate, ...filters, module: moduleName },
     });
     return response.data;
   },

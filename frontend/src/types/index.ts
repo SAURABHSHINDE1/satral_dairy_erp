@@ -449,6 +449,7 @@ export interface PouchWeighingSession {
   date: string;
   packing_supervisor_name?: string | null;
   quality_incharge_name?: string | null;
+  status?: 'draft' | 'pending_lab' | 'pending_admin' | 'approved' | 'rejected';
   heads: PouchWeighingHead[];
   created_by?: number;
   created_by_name?: string;

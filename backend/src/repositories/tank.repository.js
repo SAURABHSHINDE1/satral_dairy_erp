@@ -277,6 +277,66 @@ class TankRepository {
     );
     return rows.map(mapTrend);
   }
+
+  async getDashboardSummary() {
+    const [tables] = await pool.query(
+      "SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_TYPE = 'BASE TABLE'"
+    );
+
+    const tableNames = tables.map(t => t.TABLE_NAME);
+
+    const excludeTables = [
+      'users',
+      'approvals',
+      'activity_logs',
+      'notifications',
+      'settings',
+      'sessions',
+      'reports',
+      'knex_migrations',
+      'knex_migrations_lock'
+    ];
+
+    const excludeSuffixes = [
+      '_heads',
+      '_readings',
+      '_details',
+      '_items',
+      '_lines',
+      '_components',
+      '_approvals',
+      '_logs',
+      '_lock',
+      '_migration',
+      '_migrations'
+    ];
+
+    const moduleTables = tableNames.filter(name => {
+      if (excludeTables.includes(name)) return false;
+      if (excludeSuffixes.some(suffix => name.endsWith(suffix))) return false;
+      return true;
+    });
+
+    const counts = await Promise.all(
+      moduleTables.map(async (tableName) => {
+        try {
+          const [rows] = await pool.query(`SELECT COUNT(*) as count FROM \`${tableName}\``);
+          return {
+            tableName: tableName,
+            count: rows[0].count
+          };
+        } catch (err) {
+          console.error(`Error counting table ${tableName}:`, err);
+          return {
+            tableName: tableName,
+            count: 0
+          };
+        }
+      })
+    );
+
+    return counts;
+  }
 }
 
 module.exports = new TankRepository();

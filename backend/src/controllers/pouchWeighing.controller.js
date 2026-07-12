@@ -52,6 +52,41 @@ class PouchWeighingController {
       });
     } catch (error) { next(error); }
   }
+
+  async submitSession(req, res, next) {
+    try {
+      const session = await pouchWeighingService.submitSession(req.params.id, req.user.id);
+      res.json({ success: true, message: 'Session submitted for lab approval', data: session });
+    } catch (error) { next(error); }
+  }
+
+  async approveByLab(req, res, next) {
+    try {
+      const session = await pouchWeighingService.approveByLab(req.params.id, req.user.id);
+      res.json({ success: true, message: 'Session approved by lab incharge', data: session });
+    } catch (error) { next(error); }
+  }
+
+  async rejectByLab(req, res, next) {
+    try {
+      const session = await pouchWeighingService.rejectByLab(req.params.id, req.user.id);
+      res.json({ success: true, message: 'Session rejected by lab incharge', data: session });
+    } catch (error) { next(error); }
+  }
+
+  async approveByAdmin(req, res, next) {
+    try {
+      const session = await pouchWeighingService.approveByAdmin(req.params.id, req.user.id);
+      res.json({ success: true, message: 'Session approved by admin', data: session });
+    } catch (error) { next(error); }
+  }
+
+  async rejectByAdmin(req, res, next) {
+    try {
+      const session = await pouchWeighingService.rejectByAdmin(req.params.id, req.user.id);
+      res.json({ success: true, message: 'Session rejected by admin', data: session });
+    } catch (error) { next(error); }
+  }
 }
 
 module.exports = new PouchWeighingController();

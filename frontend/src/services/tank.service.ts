@@ -68,4 +68,9 @@ export const tankService = {
     });
     return response.data;
   },
+
+  async getDashboardSummary(): Promise<ApiResponse<{ tableName: string; count: number }[]>> {
+    const response = await api.get<ApiResponse<{ tableName: string; count: number }[]>>('/tank-records/dashboard-summary');
+    return response.data;
+  },
 };

@@ -302,6 +302,10 @@ class TankService {
   async getDailyTrend(dateFrom, dateTo) {
     return await tankRepository.getDailyTrend(formatDate(dateFrom), formatDate(dateTo));
   }
+
+  async getDashboardSummary() {
+    return await tankRepository.getDashboardSummary();
+  }
 }
 
 module.exports = new TankService();

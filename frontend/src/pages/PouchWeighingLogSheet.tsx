@@ -1,16 +1,18 @@
 import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Plus, Save, Trash2, Scale, RefreshCw, Eye, Edit2,
+  Plus, Save, Trash2, Scale, RefreshCw, Eye, Edit2, Check, X, Send,
 } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useAuthStore } from '../store/auth.store';
 import { toast } from 'sonner';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import { Badge } from '../components/ui/Badge';
 import { pouchWeighingService } from '../services/pouchWeighing.service';
 import type { PouchWeighingHead, PouchWeighingReading } from '../types';
-import { formatDate } from '../lib/utils';
+import { formatDate, getStatusColor, getStatusLabel } from '../lib/utils';
 
 const toInputDateStr = (dateStr: string | null | undefined): string => {
   if (!dateStr) return '';
@@ -148,6 +150,7 @@ function WeightCell({
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function PouchWeighingLogSheet() {
+  const { user } = useAuthStore();
   const today = new Date().toISOString().split('T')[0];
 
   // ── Tab state ───────────────────────────────────────────────────────────────
@@ -280,6 +283,69 @@ export default function PouchWeighingLogSheet() {
     onError: (err: any) => {
       toast.error(err?.response?.data?.message || 'Delete karata aale nahi');
     },
+  });
+
+  // ── Submit mutation ─────────────────────────────────────────────────────────
+  const submitMutation = useMutation({
+    mutationFn: (id: number) => pouchWeighingService.submit(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pouchWeighingSessions'] });
+      toast.success('Session submitted for lab approval!');
+      setViewSession(null);
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || 'Submission failed');
+    }
+  });
+
+  // ── Lab approval mutations ──────────────────────────────────────────────────
+  const approveLabMutation = useMutation({
+    mutationFn: (id: number) => pouchWeighingService.approveByLab(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pouchWeighingSessions'] });
+      toast.success('Session approved by Lab Incharge!');
+      setViewSession(null);
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || 'Lab approval failed');
+    }
+  });
+
+  const rejectLabMutation = useMutation({
+    mutationFn: (id: number) => pouchWeighingService.rejectByLab(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pouchWeighingSessions'] });
+      toast.success('Session rejected by Lab Incharge!');
+      setViewSession(null);
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || 'Lab rejection failed');
+    }
+  });
+
+  // ── Admin approval mutations ────────────────────────────────────────────────
+  const approveAdminMutation = useMutation({
+    mutationFn: (id: number) => pouchWeighingService.approveByAdmin(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pouchWeighingSessions'] });
+      toast.success('Session approved by Admin!');
+      setViewSession(null);
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || 'Admin approval failed');
+    }
+  });
+
+  const rejectAdminMutation = useMutation({
+    mutationFn: (id: number) => pouchWeighingService.rejectByAdmin(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pouchWeighingSessions'] });
+      toast.success('Session rejected by Admin!');
+      setViewSession(null);
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || 'Admin rejection failed');
+    }
   });
 
   const updateHead = useCallback((id: string, field: keyof LocalHead, value: any) => {
@@ -747,7 +813,7 @@ export default function PouchWeighingLogSheet() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-secondary-50 dark:bg-secondary-800 border-b border-secondary-200 dark:border-secondary-700">
-                      {['Date', 'Supervisor', 'Quality Incharge', 'Packing Heads', 'Created By', 'Created At', 'Actions'].map((h) => (
+                      {['Date', 'Supervisor', 'Quality Incharge', 'Packing Heads', 'Created By', 'Created At', 'Status', 'Actions'].map((h) => (
                         <th key={h} className="py-3 px-4 text-left text-xs font-semibold text-text-secondary whitespace-nowrap">
                           {h}
                         </th>
@@ -784,6 +850,11 @@ export default function PouchWeighingLogSheet() {
                           {formatDate(rec.created_at)}
                         </td>
                         <td className="py-3 px-4 text-xs whitespace-nowrap">
+                          <Badge className={getStatusColor(rec.status || 'draft')}>
+                            {getStatusLabel(rec.status || 'draft')}
+                          </Badge>
+                        </td>
+                        <td className="py-3 px-4 text-xs whitespace-nowrap">
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => setViewSession(rec)}
@@ -792,16 +863,93 @@ export default function PouchWeighingLogSheet() {
                             >
                               <Eye className="w-4 h-4" />
                             </button>
-                            <button
-                              onClick={() => {
-                                loadSessionIntoForm(rec);
-                                setActiveTab('entry');
-                              }}
-                              className="p-1.5 rounded hover:bg-secondary-100 dark:hover:bg-secondary-800 text-text-secondary hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                              title="Edit Session"
-                            >
-                              <Edit2 className="w-4 h-4" />
-                            </button>
+
+                            {/* Submit Button (Only for draft/rejected) */}
+                            {(rec.status === 'draft' || rec.status === 'rejected') && (
+                              <button
+                                onClick={() => {
+                                  if (window.confirm('Nikki hi session approval sathi submit karayachi ahe ka?')) {
+                                    submitMutation.mutate(rec.id);
+                                  }
+                                }}
+                                className="p-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-950/20 text-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                title="Submit for Approval"
+                              >
+                                <Send className="w-4 h-4" />
+                              </button>
+                            )}
+
+                            {/* Lab approval buttons */}
+                            {rec.status === 'pending_lab' && (user?.role === 'lab_incharge' || user?.role === 'admin') && (
+                              <>
+                                <button
+                                  onClick={() => {
+                                    if (window.confirm('Approve this session (Lab)?')) {
+                                      approveLabMutation.mutate(rec.id);
+                                    }
+                                  }}
+                                  className="p-1.5 rounded hover:bg-emerald-50 dark:hover:bg-emerald-950/20 text-emerald-600 hover:text-emerald-700 transition-colors"
+                                  title="Lab Approve"
+                                >
+                                  <Check className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    if (window.confirm('Reject this session (Lab)?')) {
+                                      rejectLabMutation.mutate(rec.id);
+                                    }
+                                  }}
+                                  className="p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-950/20 text-red-600 hover:text-red-700 transition-colors"
+                                  title="Lab Reject"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </>
+                            )}
+
+                            {/* Admin approval buttons */}
+                            {rec.status === 'pending_admin' && user?.role === 'admin' && (
+                              <>
+                                <button
+                                  onClick={() => {
+                                    if (window.confirm('Approve this session (Admin)?')) {
+                                      approveAdminMutation.mutate(rec.id);
+                                    }
+                                  }}
+                                  className="p-1.5 rounded hover:bg-emerald-50 dark:hover:bg-emerald-950/20 text-emerald-600 hover:text-emerald-700 transition-colors"
+                                  title="Admin Approve"
+                                >
+                                  <Check className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    if (window.confirm('Reject this session (Admin)?')) {
+                                      rejectAdminMutation.mutate(rec.id);
+                                    }
+                                  }}
+                                  className="p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-950/20 text-red-600 hover:text-red-700 transition-colors"
+                                  title="Admin Reject"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </>
+                            )}
+
+                            {/* Edit Button (Only for draft/rejected) */}
+                            {(rec.status === 'draft' || rec.status === 'rejected') && (
+                              <button
+                                onClick={() => {
+                                  loadSessionIntoForm(rec);
+                                  setActiveTab('entry');
+                                }}
+                                className="p-1.5 rounded hover:bg-secondary-100 dark:hover:bg-secondary-800 text-text-secondary hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                                title="Edit Session"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                            )}
+
+                            {/* Delete Button */}
                             <button
                               onClick={() => {
                                 if (window.confirm('Nikki hi pouch weighing session delete karayachi ahe ka?')) {
@@ -836,7 +984,12 @@ export default function PouchWeighingLogSheet() {
             {/* Modal Header */}
             <div className="px-6 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white flex items-center justify-between">
               <div>
-                <h3 className="font-bold text-lg">Pouch Weighing Session Details</h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-bold text-lg">Pouch Weighing Session Details</h3>
+                  <Badge className="bg-white/20 text-white border-white/30 capitalize">
+                    {getStatusLabel(viewSession.status || 'draft')}
+                  </Badge>
+                </div>
                 <p className="text-xs opacity-90">Session Date: {formatDate(viewSession.date)}</p>
               </div>
               <button
@@ -1041,7 +1194,83 @@ export default function PouchWeighingLogSheet() {
             </div>
 
             {/* Modal Footer */}
-            <div className="px-6 py-4 bg-secondary-50 dark:bg-secondary-800 border-t border-secondary-100 dark:border-secondary-700 flex justify-end">
+            <div className="px-6 py-4 bg-secondary-50 dark:bg-secondary-800 border-t border-secondary-100 dark:border-secondary-700 flex justify-between items-center gap-3">
+              <div className="flex gap-2">
+                {/* Submit for Approval */}
+                {(viewSession.status === 'draft' || viewSession.status === 'rejected') && (
+                  <Button
+                    onClick={() => {
+                      if (window.confirm('Do you want to submit this session for approval?')) {
+                        submitMutation.mutate(viewSession.id);
+                      }
+                    }}
+                    variant="primary"
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <Send className="w-4 h-4 mr-2" />
+                    Submit for Approval
+                  </Button>
+                )}
+
+                {/* Lab Approval */}
+                {viewSession.status === 'pending_lab' && (user?.role === 'lab_incharge' || user?.role === 'admin') && (
+                  <>
+                    <Button
+                      onClick={() => {
+                        if (window.confirm('Approve this session (Lab)?')) {
+                          approveLabMutation.mutate(viewSession.id);
+                        }
+                      }}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                    >
+                      <Check className="w-4 h-4 mr-2" />
+                      Approve (Lab)
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        if (window.confirm('Reject this session (Lab)?')) {
+                          rejectLabMutation.mutate(viewSession.id);
+                        }
+                      }}
+                      variant="outline"
+                      className="border-red-600 hover:bg-red-50 text-red-600 dark:hover:bg-red-950/20"
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Reject (Lab)
+                    </Button>
+                  </>
+                )}
+
+                {/* Admin Approval */}
+                {viewSession.status === 'pending_admin' && user?.role === 'admin' && (
+                  <>
+                    <Button
+                      onClick={() => {
+                        if (window.confirm('Approve this session (Admin)?')) {
+                          approveAdminMutation.mutate(viewSession.id);
+                        }
+                      }}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                    >
+                      <Check className="w-4 h-4 mr-2" />
+                      Approve (Admin)
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        if (window.confirm('Reject this session (Admin)?')) {
+                          rejectAdminMutation.mutate(viewSession.id);
+                        }
+                      }}
+                      variant="outline"
+                      className="border-red-600 hover:bg-red-50 text-red-600 dark:hover:bg-red-950/20"
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Reject (Admin)
+                    </Button>
+                  </>
+                )}
+              </div>
+
               <Button onClick={() => setViewSession(null)} variant="secondary">
                 Close
               </Button>

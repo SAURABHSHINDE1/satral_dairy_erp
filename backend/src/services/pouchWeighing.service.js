@@ -81,6 +81,76 @@ class PouchWeighingService {
     });
     return true;
   }
+
+  async submitSession(id, userId) {
+    const existing = await pouchWeighingRepository.findById(id);
+    if (!existing) throw new Error('Pouch weighing session not found');
+    await pouchWeighingRepository.updateSession(id, { status: 'pending_lab' });
+    await activityRepository.create({
+      user_id: userId,
+      action: 'submit',
+      entity_type: 'pouch_weighing_session',
+      entity_id: id,
+      details: `Submitted pouch weighing session for lab approval`
+    });
+    return await pouchWeighingRepository.findById(id);
+  }
+
+  async approveByLab(id, userId) {
+    const existing = await pouchWeighingRepository.findById(id);
+    if (!existing) throw new Error('Pouch weighing session not found');
+    await pouchWeighingRepository.updateSession(id, { status: 'pending_admin' });
+    await activityRepository.create({
+      user_id: userId,
+      action: 'approve',
+      entity_type: 'pouch_weighing_session',
+      entity_id: id,
+      details: `Lab approved pouch weighing session`
+    });
+    return await pouchWeighingRepository.findById(id);
+  }
+
+  async rejectByLab(id, userId) {
+    const existing = await pouchWeighingRepository.findById(id);
+    if (!existing) throw new Error('Pouch weighing session not found');
+    await pouchWeighingRepository.updateSession(id, { status: 'rejected' });
+    await activityRepository.create({
+      user_id: userId,
+      action: 'reject',
+      entity_type: 'pouch_weighing_session',
+      entity_id: id,
+      details: `Lab rejected pouch weighing session`
+    });
+    return await pouchWeighingRepository.findById(id);
+  }
+
+  async approveByAdmin(id, userId) {
+    const existing = await pouchWeighingRepository.findById(id);
+    if (!existing) throw new Error('Pouch weighing session not found');
+    await pouchWeighingRepository.updateSession(id, { status: 'approved' });
+    await activityRepository.create({
+      user_id: userId,
+      action: 'approve',
+      entity_type: 'pouch_weighing_session',
+      entity_id: id,
+      details: `Admin approved pouch weighing session`
+    });
+    return await pouchWeighingRepository.findById(id);
+  }
+
+  async rejectByAdmin(id, userId) {
+    const existing = await pouchWeighingRepository.findById(id);
+    if (!existing) throw new Error('Pouch weighing session not found');
+    await pouchWeighingRepository.updateSession(id, { status: 'rejected' });
+    await activityRepository.create({
+      user_id: userId,
+      action: 'reject',
+      entity_type: 'pouch_weighing_session',
+      entity_id: id,
+      details: `Admin rejected pouch weighing session`
+    });
+    return await pouchWeighingRepository.findById(id);
+  }
 }
 
 module.exports = new PouchWeighingService();

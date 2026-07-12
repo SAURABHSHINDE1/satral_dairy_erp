@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS `pouch_weighing_sessions` (
   `date`                     DATE         NOT NULL,
   `packing_supervisor_name`  VARCHAR(150)          DEFAULT NULL,
   `quality_incharge_name`    VARCHAR(150)          DEFAULT NULL,
+  `status`                   ENUM('draft', 'pending_lab', 'pending_admin', 'approved', 'rejected') NOT NULL DEFAULT 'draft',
   `created_at`               DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `created_by`               INT UNSIGNED          DEFAULT NULL,
   PRIMARY KEY (`id`),

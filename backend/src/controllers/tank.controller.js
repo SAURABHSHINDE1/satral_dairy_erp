@@ -177,6 +177,18 @@ class TankController {
       next(error);
     }
   }
+
+  async getDashboardSummary(req, res, next) {
+    try {
+      const summary = await tankService.getDashboardSummary();
+      res.json({
+        success: true,
+        data: summary
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new TankController();

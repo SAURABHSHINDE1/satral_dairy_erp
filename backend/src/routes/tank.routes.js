@@ -12,6 +12,7 @@ router.use(authenticate);
 router.get('/', tankController.getAllTankRecords);
 router.get('/statistics', tankController.getStatistics);
 router.get('/daily-trend', tankController.getDailyTrend);
+router.get('/dashboard-summary', tankController.getDashboardSummary);
 
 // Get single record (all roles)
 router.get('/:id', tankController.getTankRecordById);

@@ -3,8 +3,8 @@ const reportService = require('../services/report.service');
 class ReportController {
   async getDailyReport(req, res, next) {
     try {
-      const { date } = req.query;
-      const report = await reportService.getDailyReport(date);
+      const { date, module: moduleName } = req.query;
+      const report = await reportService.getDailyReport(date, moduleName);
 
       res.json({
         success: true,
@@ -17,8 +17,8 @@ class ReportController {
 
   async getWeeklyReport(req, res, next) {
     try {
-      const { start_date, end_date } = req.query;
-      const report = await reportService.getWeeklyReport(start_date, end_date);
+      const { start_date, end_date, module: moduleName } = req.query;
+      const report = await reportService.getWeeklyReport(start_date, end_date, moduleName);
 
       res.json({
         success: true,
@@ -31,8 +31,8 @@ class ReportController {
 
   async getMonthlyReport(req, res, next) {
     try {
-      const { year, month } = req.query;
-      const report = await reportService.getMonthlyReport(year, month);
+      const { year, month, module: moduleName } = req.query;
+      const report = await reportService.getMonthlyReport(year, month, moduleName);
 
       res.json({
         success: true,
@@ -45,12 +45,11 @@ class ReportController {
 
   async getCustomReport(req, res, next) {
     try {
-      const { start_date, end_date } = req.query;
+      const { start_date, end_date, module: moduleName } = req.query;
       const filters = {
-        status: req.query.status,
-        process_operator_id: req.query.process_operator_id
+        status: req.query.status
       };
-      const report = await reportService.getCustomReport(start_date, end_date, filters);
+      const report = await reportService.getCustomReport(start_date, end_date, filters, moduleName);
 
       res.json({
         success: true,

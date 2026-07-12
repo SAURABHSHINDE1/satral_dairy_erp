@@ -22,4 +22,15 @@ router.put('/:id', authorize(...CAN_WRITE), pouchWeighingController.updateSessio
 // DELETE session — quality roles
 router.delete('/:id', authorize(...CAN_WRITE), pouchWeighingController.deleteSession);
 
+// Submit session (all quality roles can submit)
+router.put('/:id/submit', authorize(...CAN_WRITE), pouchWeighingController.submitSession);
+
+// Lab approval
+router.post('/:id/approve-lab', authorize('lab_incharge', 'quality_incharge', 'admin'), pouchWeighingController.approveByLab);
+router.post('/:id/reject-lab', authorize('lab_incharge', 'quality_incharge', 'admin'), pouchWeighingController.rejectByLab);
+
+// Admin approval
+router.post('/:id/approve-admin', authorize('admin'), pouchWeighingController.approveByAdmin);
+router.post('/:id/reject-admin', authorize('admin'), pouchWeighingController.rejectByAdmin);
+
 module.exports = router;
