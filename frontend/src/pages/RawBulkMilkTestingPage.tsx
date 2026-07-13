@@ -544,7 +544,7 @@ export default function RawBulkMilkTestingPage() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm" style={{ minWidth: 1500 }}>
+                <table className="w-full text-sm records-table" style={{ minWidth: 1500 }}>
                   <thead>
                     <tr className="bg-secondary-50 border-b border-secondary-200">
                       {['Date', 'Time', 'Sample', 'Milk Type', 'Qty (L)', 'Temp °C', 'OT', 'Acidity %', 'Alcohol', 'FAT %', 'CLR', 'SNF', 'Protein %', 'Na/Electrolyte', 'pH', 'Chemist', 'Q. Incharge', 'Status', 'Actions'].map(h => (
@@ -680,44 +680,103 @@ export default function RawBulkMilkTestingPage() {
 
       {/* VIEW MODAL */}
       {viewRecord && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-2xl">
-            <Card>
-              <div className="flex items-center justify-between mb-5">
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="w-full max-w-5xl max-h-[90vh] flex flex-col"
+          >
+            <Card className="p-0 overflow-hidden flex flex-col h-full">
+              {/* ── Modal Header ── */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-secondary-200 bg-gradient-to-r from-emerald-50 to-teal-50 flex-shrink-0">
                 <div>
-                  <h2 className="text-xl font-bold text-text-primary">Record Details</h2>
-                  <span className="inline-flex mt-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">{viewRecord.sample_name}</span>
-                </div>
-                <button onClick={() => setViewRecord(null)} className="p-2 rounded-lg hover:bg-secondary-100 text-text-secondary">✕</button>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-[60vh] overflow-y-auto">
-                {[
-                  ['Date',              formatDate(viewRecord.date)],
-                  ['Testing Time',      viewRecord.testing_time ?? '—'],
-                  ['Sample Name',       viewRecord.sample_name],
-                  ['Type of Milk',      viewRecord.type_of_milk],
-                  ['Quantity (Lit)',     viewRecord.milk_quantity_lit?.toFixed(2) ?? '—'],
-                  ['Temperature (°C)',  viewRecord.temp_celsius?.toFixed(1) ?? '—'],
-                  ['OT',                viewRecord.ot?.toFixed(2) ?? '—'],
-                  ['Acidity %',         viewRecord.acidity_percent?.toFixed(3) ?? '—'],
-                  ['Alcohol Result',    viewRecord.alcohol_result ?? '—'],
-                  ['FAT %',             viewRecord.fat_percent?.toFixed(2) ?? '—'],
-                  ['CLR',               viewRecord.clr?.toFixed(3) ?? '—'],
-                  ['SNF',               viewRecord.snf?.toFixed(2) ?? '—'],
-                  ['Protein %',         viewRecord.protein_percent?.toFixed(2) ?? '—'],
-                  ['Na/Electrolyte',    viewRecord.sodium_electrolyte_condition ?? '—'],
-                  ['pH',                viewRecord.ph?.toFixed(2) ?? '—'],
-                  ['Chemist',           viewRecord.chemist_name ?? '—'],
-                  ['Quality Incharge',  viewRecord.quality_incharge_name ?? '—'],
-                  ['Created By',        viewRecord.created_by_name ?? '—'],
-                ].map(([label, value]) => (
-                  <div key={label} className="bg-secondary-50 rounded-lg p-3">
-                    <p className="text-xs text-text-secondary mb-0.5">{label}</p>
-                    <p className="font-medium text-text-primary text-sm">{value}</p>
+                  <h2 className="text-lg font-bold text-emerald-800 tracking-wide uppercase">
+                    Raw Bulk Milk Testing Record
+                  </h2>
+                  <div className="flex items-center gap-4 mt-1 text-xs text-emerald-700 font-medium">
+                    <span>Date: <strong>{formatDate(viewRecord.date)}</strong></span>
                   </div>
-                ))}
+                </div>
+                <button
+                  onClick={() => setViewRecord(null)}
+                  className="p-2 rounded-lg hover:bg-emerald-100 text-emerald-700 transition-colors text-lg font-bold"
+                >✕</button>
               </div>
-              <div className="flex justify-end mt-5">
+
+              {/* ── Paper-format Table ── */}
+              <div className="overflow-x-auto overflow-y-auto flex-1 px-4 py-4">
+                <table className="records-table w-full text-xs" style={{ minWidth: 1000 }}>
+                  <thead>
+                    <tr>
+                      <th style={{ width: 32 }}>Sr. No.</th>
+                      <th>Testing Time</th>
+                      <th>Sample Name</th>
+                      <th>Type of Milk</th>
+                      <th>Milk Qty (L)</th>
+                      <th>Temp (°C)</th>
+                      <th>OT</th>
+                      <th>Acidity (%)</th>
+                      <th>Alcohol</th>
+                      <th>FAT (%)</th>
+                      <th>CLR</th>
+                      <th>SNF</th>
+                      <th>Protein (%)</th>
+                      <th>Sodium Electrolyte Condition</th>
+                      <th>PH</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="text-center font-semibold">1</td>
+                      <td>{viewRecord.testing_time ?? '—'}</td>
+                      <td className="font-semibold">{viewRecord.sample_name}</td>
+                      <td>{viewRecord.type_of_milk}</td>
+                      <td>{viewRecord.milk_quantity_lit?.toFixed(2) ?? '—'}</td>
+                      <td>{viewRecord.temp_celsius?.toFixed(1) ?? '—'}</td>
+                      <td>{viewRecord.ot?.toFixed(2) ?? '—'}</td>
+                      <td>{viewRecord.acidity_percent?.toFixed(3) ?? '—'}</td>
+                      <td>{viewRecord.alcohol_result ?? '—'}</td>
+                      <td>{viewRecord.fat_percent?.toFixed(2) ?? '—'}</td>
+                      <td>{viewRecord.clr?.toFixed(3) ?? '—'}</td>
+                      <td>{viewRecord.snf?.toFixed(2) ?? '—'}</td>
+                      <td>{viewRecord.protein_percent?.toFixed(2) ?? '—'}</td>
+                      <td>{viewRecord.sodium_electrolyte_condition ?? '—'}</td>
+                      <td>{viewRecord.ph?.toFixed(2) ?? '—'}</td>
+                    </tr>
+                    {/* Empty rows to match paper format */}
+                    {[...Array(3)].map((_, i) => (
+                      <tr key={i} className="h-8">
+                        <td className="text-center text-secondary-300">{i + 2}</td>
+                        {[...Array(14)].map((__, j) => <td key={j}>&nbsp;</td>)}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* ── Footer: Signatures ── */}
+              <div className="border-t border-secondary-200 px-6 py-4 flex-shrink-0 bg-white">
+                <div className="flex items-end justify-between flex-wrap gap-4">
+                  <div className="text-center">
+                    <div className="w-40 border-b border-secondary-400 mb-1 pb-1 text-sm font-medium text-text-primary">
+                      {viewRecord.chemist_name || '—'}
+                    </div>
+                    <p className="text-xs text-text-secondary">Chemist</p>
+                  </div>
+                  <div className="text-xs text-text-secondary italic">
+                    Created by: {viewRecord.created_by_name ?? '—'}
+                  </div>
+                  <div className="text-center">
+                    <div className="w-48 border-b border-secondary-400 mb-1 pb-1 text-sm font-medium text-text-primary">
+                      {viewRecord.quality_incharge_name || '—'}
+                    </div>
+                    <p className="text-xs text-text-secondary">Quality Incharge</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Close Button ── */}
+              <div className="flex justify-end px-6 py-3 border-t border-secondary-100 bg-secondary-50 flex-shrink-0">
                 <Button variant="outline" onClick={() => setViewRecord(null)}>Close</Button>
               </div>
             </Card>

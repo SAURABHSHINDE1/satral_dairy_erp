@@ -810,7 +810,7 @@ export default function PouchWeighingLogSheet() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full text-sm records-table">
                   <thead>
                     <tr className="bg-secondary-50 dark:bg-secondary-800 border-b border-secondary-200 dark:border-secondary-700">
                       {['Date', 'Supervisor', 'Quality Incharge', 'Packing Heads', 'Created By', 'Created At', 'Status', 'Actions'].map((h) => (

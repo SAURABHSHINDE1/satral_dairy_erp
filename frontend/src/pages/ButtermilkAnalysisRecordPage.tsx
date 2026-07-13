@@ -709,7 +709,7 @@ export default function ButtermilkAnalysisRecordPage() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm" style={{ minWidth: 1650 }}>
+                <table className="w-full text-sm records-table" style={{ minWidth: 1650 }}>
                   <thead>
                     <tr className="bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-secondary-800/50 dark:to-secondary-800/30 border-b border-indigo-100 dark:border-secondary-700">
                       <th className="py-3 px-3 text-left text-xs font-semibold text-indigo-700 dark:text-indigo-400 whitespace-nowrap">Date</th>
@@ -778,55 +778,112 @@ export default function ButtermilkAnalysisRecordPage() {
       <AnimatePresence>
         {viewRecord && (
           <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
             onClick={() => setViewRecord(null)}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white dark:bg-secondary-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto"
+              className="w-full max-w-5xl max-h-[90vh] flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="p-6 border-b border-secondary-100 dark:border-secondary-700 flex items-center justify-between">
-                <h2 className="text-xl font-bold text-text-primary flex items-center gap-2">
-                  <Milk className="w-5 h-5 text-indigo-500" />
-                  Butter Milk Analysis Record Details
-                </h2>
-                <button onClick={() => setViewRecord(null)} className="text-text-secondary hover:text-text-primary text-xl font-bold">✕</button>
-              </div>
-              <div className="p-6">
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  {[
-                    ['Date',                    formatDate(viewRecord.date)],
-                    ['Shift',                   viewRecord.shift],
-                    ['Sample Type',             viewRecord.type_of_sample],
-                    ['Testing Time',            viewRecord.testing_time],
-                    ['Batch No',                viewRecord.batch_no],
-                    ['Packing Date',            viewRecord.packing_date],
-                    ['Expiry Date',             viewRecord.expiry_date],
-                    ['Flavour',                 viewRecord.flavour],
-                    ['Taste',                   viewRecord.taste],
-                    ['Fat %',                   viewRecord.fat_percent],
-                    ['Degree',                  viewRecord.degree],
-                    ['Acidity %',               viewRecord.acidity_percent],
-                    ['Protein %',               viewRecord.protein_percent],
-                    ['Adulteration',            viewRecord.adulteration],
-                    ['Remark',                  viewRecord.remark],
-                    ['Sign / Name',             viewRecord.sign_name],
-                    ['Chemist Name',            viewRecord.chemist_name],
-                    ['Quality Incharge Name',   viewRecord.quality_incharge_name],
-                  ].map(([label, value]) => (
-                    <div key={label} className="flex flex-col gap-0.5">
-                      <span className="text-xs text-text-secondary font-medium">{label}</span>
-                      <span className="text-text-primary font-semibold">{value}</span>
+              <Card className="p-0 overflow-hidden flex flex-col h-full">
+                {/* ── Modal Header ── */}
+                <div className="flex items-center justify-between px-6 py-4 border-b border-secondary-200 bg-gradient-to-r from-indigo-50 to-blue-50 flex-shrink-0">
+                  <div>
+                    <h2 className="text-lg font-bold text-indigo-800 tracking-wide uppercase">
+                      Butter Milk Analysis Record
+                    </h2>
+                    <div className="flex items-center gap-4 mt-1 text-xs text-indigo-700 font-medium">
+                      <span>Date: <strong>{formatDate(viewRecord.date)}</strong></span>
+                      <span>|</span>
+                      <span>Shift: <strong className="capitalize">{viewRecord.shift}</strong></span>
                     </div>
-                  ))}
+                  </div>
+                  <button
+                    onClick={() => setViewRecord(null)}
+                    className="p-2 rounded-lg hover:bg-indigo-100 text-indigo-700 transition-colors text-lg font-bold"
+                  >✕</button>
                 </div>
-                <div className="mt-6 flex justify-end">
-                  <Button onClick={() => setViewRecord(null)}>Close</Button>
+
+                {/* ── Paper-format Table ── */}
+                <div className="overflow-x-auto overflow-y-auto flex-1 px-4 py-4">
+                  <table className="records-table w-full text-xs" style={{ minWidth: 1000 }}>
+                    <thead>
+                      <tr>
+                        <th style={{ width: 32 }}>Sr. No.</th>
+                        <th>Type of Sample</th>
+                        <th>Testing Time</th>
+                        <th>Batch No.</th>
+                        <th>Packing Date</th>
+                        <th>Expiry Date</th>
+                        <th>Flavour</th>
+                        <th>Taste</th>
+                        <th>Fat (%)</th>
+                        <th>Degree</th>
+                        <th>Acidity (%)</th>
+                        <th>Protein (%)</th>
+                        <th>Adulteration</th>
+                        <th>Remark</th>
+                        <th>Sign / Name</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="text-center font-semibold">1</td>
+                        <td>{viewRecord.type_of_sample}</td>
+                        <td>{viewRecord.testing_time}</td>
+                        <td className="font-semibold">{viewRecord.batch_no}</td>
+                        <td>{viewRecord.packing_date}</td>
+                        <td>{viewRecord.expiry_date}</td>
+                        <td>{viewRecord.flavour}</td>
+                        <td>{viewRecord.taste}</td>
+                        <td>{viewRecord.fat_percent}</td>
+                        <td>{viewRecord.degree}</td>
+                        <td>{viewRecord.acidity_percent}</td>
+                        <td>{viewRecord.protein_percent}</td>
+                        <td>{viewRecord.adulteration}</td>
+                        <td>{viewRecord.remark}</td>
+                        <td>{viewRecord.sign_name}</td>
+                      </tr>
+                      {/* Empty rows to match paper format */}
+                      {[...Array(3)].map((_, i) => (
+                        <tr key={i} className="h-8">
+                          <td className="text-center text-secondary-300">{i + 2}</td>
+                          {[...Array(14)].map((__, j) => <td key={j}>&nbsp;</td>)}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              </div>
+
+                {/* ── Footer: Signatures ── */}
+                <div className="border-t border-secondary-200 px-6 py-4 flex-shrink-0 bg-white">
+                  <div className="flex items-end justify-between flex-wrap gap-4">
+                    <div className="text-center">
+                      <div className="w-40 border-b border-secondary-400 mb-1 pb-1 text-sm font-medium text-text-primary">
+                        {viewRecord.chemist_name || '—'}
+                      </div>
+                      <p className="text-xs text-text-secondary">Chemist</p>
+                    </div>
+                    <div className="text-xs text-text-secondary italic">
+                      Created by: {viewRecord.created_by_name ?? '—'}
+                    </div>
+                    <div className="text-center">
+                      <div className="w-48 border-b border-secondary-400 mb-1 pb-1 text-sm font-medium text-text-primary">
+                        {viewRecord.quality_incharge_name || '—'}
+                      </div>
+                      <p className="text-xs text-text-secondary">Quality Incharge</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── Close Button ── */}
+                <div className="flex justify-end px-6 py-3 border-t border-secondary-100 bg-secondary-50 flex-shrink-0">
+                  <Button variant="outline" onClick={() => setViewRecord(null)}>Close</Button>
+                </div>
+              </Card>
             </motion.div>
           </div>
         )}

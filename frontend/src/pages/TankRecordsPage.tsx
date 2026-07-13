@@ -298,7 +298,7 @@ export default function TankRecordsPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full records-table">
               <thead>
                 <tr className="border-b border-secondary-200">
                   <th className="text-left py-3 px-4 text-sm font-semibold text-text-secondary">Date</th>

@@ -556,7 +556,7 @@ export default function ReportsPage() {
                 </h4>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-xs">
+                <table className="w-full text-xs records-table">
                   <thead>
                     <tr className="bg-secondary-50 dark:bg-secondary-800 border-b border-secondary-200 dark:border-secondary-700">
                       {visibleColumns.map((col) => (

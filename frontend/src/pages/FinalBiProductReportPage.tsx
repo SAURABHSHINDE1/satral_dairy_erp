@@ -24,11 +24,11 @@ type FieldKey = 'body_structure' | 'sensory' | 'taste' | 'temp_celsius' |
 
 // Fields that are ACTIVE (not greyed out) per product type
 const PRODUCT_ACTIVE_FIELDS: Record<string, FieldKey[]> = {
-  Dahi:   ['body_structure', 'sensory', 'taste', 'temp_celsius', 'acidity_percent', 'ph', 'self_life', 'fat_percent', 'ts'],
-  Lassi:  ['body_structure', 'sensory', 'taste', 'temp_celsius', 'acidity_percent', 'ph', 'self_life', 'fat_percent', 'ts', 'lassi_viscosity'],
-  Paneer: ['body_structure', 'sensory', 'taste', 'temp_celsius', 'acidity_percent', 'ph', 'self_life', 'fdm', 'fat_percent', 'ts', 'moisture'],
-  Peda:   ['body_structure', 'sensory', 'taste', 'temp_celsius', 'acidity_percent', 'self_life', 'fdm', 'fat_percent', 'ts', 'moisture'],
-  Khoya:  ['body_structure', 'sensory', 'taste', 'temp_celsius', 'acidity_percent', 'self_life', 'fat_percent', 'ts', 'moisture'],
+  Dahi:   ['body_structure', 'sensory', 'taste', 'temp_celsius', 'acidity_percent', 'ph', 'self_life', 'fat_percent', 'ts', 'fdm', 'lassi_viscosity', 'moisture'],
+  Lassi:  ['body_structure', 'sensory', 'taste', 'temp_celsius', 'acidity_percent', 'ph', 'self_life', 'fat_percent', 'ts', 'lassi_viscosity', 'fdm', 'moisture'],
+  Paneer: ['body_structure', 'sensory', 'taste', 'temp_celsius', 'acidity_percent', 'ph', 'self_life', 'fdm', 'fat_percent', 'ts', 'moisture', 'lassi_viscosity'],
+  Peda:   ['body_structure', 'sensory', 'taste', 'temp_celsius', 'acidity_percent', 'self_life', 'fdm', 'fat_percent', 'ts', 'moisture', 'lassi_viscosity'],
+  Khoya:  ['body_structure', 'sensory', 'taste', 'temp_celsius', 'acidity_percent', 'self_life', 'fat_percent', 'ts', 'moisture', 'fdm', 'lassi_viscosity'],
   Other:  ['body_structure', 'sensory', 'taste', 'temp_celsius', 'acidity_percent', 'ph', 'self_life', 'fdm', 'fat_percent', 'ts', 'lassi_viscosity', 'moisture'],
 };
 
@@ -624,7 +624,7 @@ export default function FinalBiProductReportPage() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm" style={{ minWidth: 1400 }}>
+                <table className="w-full text-sm records-table" style={{ minWidth: 1400 }}>
                   <thead>
                     <tr className="bg-secondary-50 border-b border-secondary-200">
                       {[
@@ -775,49 +775,103 @@ export default function FinalBiProductReportPage() {
 
       {/* VIEW MODAL */}
       {viewRecord && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-2xl">
-            <Card>
-              <div className="flex items-center justify-between mb-5">
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="w-full max-w-5xl max-h-[90vh] flex flex-col"
+          >
+            <Card className="p-0 overflow-hidden flex flex-col h-full">
+              {/* ── Modal Header ── */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-secondary-200 bg-gradient-to-r from-violet-50 to-purple-50 flex-shrink-0">
                 <div>
-                  <h2 className="text-xl font-bold text-text-primary">Report Details</h2>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="font-mono text-sm text-text-secondary">{viewRecord.batch_no}</span>
-                    <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${getProductColor(viewRecord.product_name)}`}>
-                      {viewRecord.product_name}
-                    </span>
+                  <h2 className="text-lg font-bold text-violet-800 tracking-wide uppercase">
+                    Final Bi-Product Report
+                  </h2>
+                  <div className="flex items-center gap-4 mt-1 text-xs text-violet-700 font-medium">
+                    <span>Date: <strong>{formatDate(viewRecord.date)}</strong></span>
+                    <span>|</span>
+                    <span>Batch No: <strong>{viewRecord.batch_no}</strong></span>
                   </div>
                 </div>
-                <button onClick={() => setViewRecord(null)} className="p-2 rounded-lg hover:bg-secondary-100 text-text-secondary">✕</button>
+                <button
+                  onClick={() => setViewRecord(null)}
+                  className="p-2 rounded-lg hover:bg-violet-100 text-violet-700 transition-colors text-lg font-bold"
+                >✕</button>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-sm max-h-[60vh] overflow-y-auto">
-                {[
-                  ['Date', formatDate(viewRecord.date)],
-                  ['Batch No.', viewRecord.batch_no],
-                  ['Product', viewRecord.product_name],
-                  ['Body/Structure', viewRecord.body_structure ?? '—'],
-                  ['Sensory', viewRecord.sensory ?? '—'],
-                  ['Taste', viewRecord.taste ?? '—'],
-                  ['Temperature (°C)', viewRecord.temp_celsius?.toFixed(1) ?? '—'],
-                  ['Acidity %', viewRecord.acidity_percent?.toFixed(3) ?? '—'],
-                  ['pH', viewRecord.ph?.toFixed(2) ?? '—'],
-                  ['Self Life', viewRecord.self_life ?? '—'],
-                  ['FDM %', viewRecord.fdm?.toFixed(2) ?? '—'],
-                  ['FAT %', viewRecord.fat_percent?.toFixed(2) ?? '—'],
-                  ['TS %', viewRecord.ts?.toFixed(2) ?? '—'],
-                  ['Lassi Viscosity', viewRecord.lassi_viscosity?.toFixed(2) ?? '—'],
-                  ['Moisture %', viewRecord.moisture?.toFixed(2) ?? '—'],
-                  ['Chemist', viewRecord.chemist_name ?? '—'],
-                  ['Quality Incharge', viewRecord.quality_incharge_name ?? '—'],
-                  ['Created By', viewRecord.created_by_name ?? '—'],
-                ].map(([label, value]) => (
-                  <div key={label} className="bg-secondary-50 rounded-lg p-3">
-                    <p className="text-xs text-text-secondary mb-0.5">{label}</p>
-                    <p className="font-medium text-text-primary text-sm">{value}</p>
+
+              {/* ── Paper-format Table ── */}
+              <div className="overflow-x-auto overflow-y-auto flex-1 px-4 py-4">
+                <table className="records-table w-full text-xs" style={{ minWidth: 1000 }}>
+                  <thead>
+                    <tr>
+                      <th style={{ width: 32 }}>Sr. No.</th>
+                      <th>Product Name</th>
+                      <th>Body / Structure</th>
+                      <th>Sensory</th>
+                      <th>Taste</th>
+                      <th>Temp (°C)</th>
+                      <th>Acidity (%)</th>
+                      <th>pH</th>
+                      <th>Self Life</th>
+                      <th>FDM (%)</th>
+                      <th>FAT (%)</th>
+                      <th>T.S. (%)</th>
+                      <th>Lassi Viscosity</th>
+                      <th>Moisture (%)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="text-center font-semibold">1</td>
+                      <td className="font-semibold">{viewRecord.product_name}</td>
+                      <td>{viewRecord.body_structure ?? '—'}</td>
+                      <td>{viewRecord.sensory ?? '—'}</td>
+                      <td>{viewRecord.taste ?? '—'}</td>
+                      <td>{viewRecord.temp_celsius?.toFixed(1) ?? '—'}</td>
+                      <td>{viewRecord.acidity_percent?.toFixed(3) ?? '—'}</td>
+                      <td>{viewRecord.ph?.toFixed(2) ?? '—'}</td>
+                      <td>{viewRecord.self_life ?? '—'}</td>
+                      <td>{viewRecord.fdm?.toFixed(2) ?? '—'}</td>
+                      <td>{viewRecord.fat_percent?.toFixed(2) ?? '—'}</td>
+                      <td>{viewRecord.ts?.toFixed(2) ?? '—'}</td>
+                      <td>{viewRecord.lassi_viscosity?.toFixed(2) ?? '—'}</td>
+                      <td>{viewRecord.moisture?.toFixed(2) ?? '—'}</td>
+                    </tr>
+                    {/* Empty rows to match paper format */}
+                    {[...Array(3)].map((_, i) => (
+                      <tr key={i} className="h-8">
+                        <td className="text-center text-secondary-300">{i + 2}</td>
+                        {[...Array(13)].map((__, j) => <td key={j}>&nbsp;</td>)}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* ── Footer: Signatures ── */}
+              <div className="border-t border-secondary-200 px-6 py-4 flex-shrink-0 bg-white">
+                <div className="flex items-end justify-between flex-wrap gap-4">
+                  <div className="text-center">
+                    <div className="w-40 border-b border-secondary-400 mb-1 pb-1 text-sm font-medium text-text-primary">
+                      {viewRecord.chemist_name || '—'}
+                    </div>
+                    <p className="text-xs text-text-secondary">Chemist</p>
                   </div>
-                ))}
+                  <div className="text-xs text-text-secondary italic">
+                    Created by: {viewRecord.created_by_name ?? '—'}
+                  </div>
+                  <div className="text-center">
+                    <div className="w-48 border-b border-secondary-400 mb-1 pb-1 text-sm font-medium text-text-primary">
+                      {viewRecord.quality_incharge_name || '—'}
+                    </div>
+                    <p className="text-xs text-text-secondary">Quality Incharge</p>
+                  </div>
+                </div>
               </div>
-              <div className="flex justify-end mt-5">
+
+              {/* ── Close Button ── */}
+              <div className="flex justify-end px-6 py-3 border-t border-secondary-100 bg-secondary-50 flex-shrink-0">
                 <Button variant="outline" onClick={() => setViewRecord(null)}>Close</Button>
               </div>
             </Card>

@@ -591,7 +591,7 @@ export default function MilkTakenReportByProduct() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm" style={{ minWidth: 1300 }}>
+                <table className="w-full text-sm records-table" style={{ minWidth: 1300 }}>
                   <thead>
                     <tr className="bg-gradient-to-r from-orange-50 to-amber-50 border-b border-orange-100">
                       {[
@@ -687,52 +687,102 @@ export default function MilkTakenReportByProduct() {
 
       {/* ── View Modal ─────────────────────────────────────────────────────── */}
       {viewRecord && (
-        <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          onClick={() => setViewRecord(null)}
-        >
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white dark:bg-secondary-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-5xl max-h-[90vh] flex flex-col"
           >
-            <div className="p-6 border-b border-secondary-100 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-text-primary flex items-center gap-2">
-                <Beaker className="w-5 h-5 text-orange-500" />
-                Milk Taken Report — Bi-Product Details
-              </h2>
-              <button onClick={() => setViewRecord(null)} className="text-text-secondary hover:text-text-primary text-xl font-bold">✕</button>
-            </div>
-            <div className="p-6">
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                {[
-                  ['Date',                    formatDate(viewRecord.date)],
-                  ['Product Name',            viewRecord.product_name],
-                  ['Testing Time',            viewRecord.testing_time ?? '—'],
-                  ['Temperature (°C)',        viewRecord.temp_celsius ?? '—'],
-                  ['OT',                      viewRecord.ot ?? '—'],
-                  ['Acidity %',               viewRecord.acidity_percent ?? '—'],
-                  ['Alcohol Result',          viewRecord.alcohol_result ?? '—'],
-                  ['FAT %',                   viewRecord.fat_percent ?? '—'],
-                  ['CLR',                     viewRecord.clr ?? '—'],
-                  ['SNF %',                   viewRecord.snf_percent ?? '—'],
-                  ['Neutralizer/Adultration', viewRecord.neutralizer_adultration ?? '—'],
-                  ['Na/Electrolyte',          viewRecord.sodium_electrolyte_condition ?? '—'],
-                  ['pH',                      viewRecord.ph ?? '—'],
-                  ['Chemist',                 viewRecord.chemist_name ?? '—'],
-                  ['QC Manager',              viewRecord.qc_manager_name ?? '—'],
-                ].map(([label, value]) => (
-                  <div key={String(label)} className="flex flex-col gap-0.5">
-                    <span className="text-xs text-text-secondary font-medium">{label}</span>
-                    <span className="text-text-primary font-semibold">{String(value)}</span>
+            <Card className="p-0 overflow-hidden flex flex-col h-full">
+              {/* ── Modal Header ── */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-secondary-200 bg-gradient-to-r from-orange-50 to-amber-50 flex-shrink-0">
+                <div>
+                  <h2 className="text-lg font-bold text-orange-800 tracking-wide uppercase">
+                    Milk Taken Report For Bi-Product
+                  </h2>
+                  <div className="flex items-center gap-4 mt-1 text-xs text-orange-700 font-medium">
+                    <span>Date: <strong>{formatDate(viewRecord.date)}</strong></span>
                   </div>
-                ))}
+                </div>
+                <button
+                  onClick={() => setViewRecord(null)}
+                  className="p-2 rounded-lg hover:bg-orange-100 text-orange-700 transition-colors text-lg font-bold"
+                >✕</button>
               </div>
-              <div className="mt-6 flex justify-end">
-                <Button onClick={() => setViewRecord(null)}>Close</Button>
+
+              {/* ── Paper-format Table ── */}
+              <div className="overflow-x-auto overflow-y-auto flex-1 px-4 py-4">
+                <table className="records-table w-full text-xs" style={{ minWidth: 1000 }}>
+                  <thead>
+                    <tr>
+                      <th style={{ width: 32 }}>Sr. No.</th>
+                      <th>Product Name</th>
+                      <th>Testing Time</th>
+                      <th>Temp (°C)</th>
+                      <th>OT</th>
+                      <th>Acidity (%)</th>
+                      <th>Alcohol</th>
+                      <th>FAT (%)</th>
+                      <th>CLR</th>
+                      <th>SNF (%)</th>
+                      <th>Neutralizer</th>
+                      <th>Na / Electrolyte</th>
+                      <th>pH</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="text-center font-semibold">1</td>
+                      <td className="font-semibold">{viewRecord.product_name}</td>
+                      <td>{viewRecord.testing_time ?? '—'}</td>
+                      <td>{viewRecord.temp_celsius?.toFixed(1) ?? '—'}</td>
+                      <td>{viewRecord.ot?.toFixed(2) ?? '—'}</td>
+                      <td>{viewRecord.acidity_percent?.toFixed(3) ?? '—'}</td>
+                      <td>{viewRecord.alcohol_result ?? '—'}</td>
+                      <td>{viewRecord.fat_percent?.toFixed(2) ?? '—'}</td>
+                      <td>{viewRecord.clr?.toFixed(3) ?? '—'}</td>
+                      <td>{viewRecord.snf_percent?.toFixed(2) ?? '—'}</td>
+                      <td>{viewRecord.neutralizer_adultration ?? '—'}</td>
+                      <td>{viewRecord.sodium_electrolyte_condition ?? '—'}</td>
+                      <td>{viewRecord.ph?.toFixed(2) ?? '—'}</td>
+                    </tr>
+                    {/* Empty rows to match paper format */}
+                    {[...Array(3)].map((_, i) => (
+                      <tr key={i} className="h-8">
+                        <td className="text-center text-secondary-300">{i + 2}</td>
+                        {[...Array(12)].map((__, j) => <td key={j}>&nbsp;</td>)}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            </div>
+
+              {/* ── Footer: Signatures ── */}
+              <div className="border-t border-secondary-200 px-6 py-4 flex-shrink-0 bg-white">
+                <div className="flex items-end justify-between flex-wrap gap-4">
+                  <div className="text-center">
+                    <div className="w-40 border-b border-secondary-400 mb-1 pb-1 text-sm font-medium text-text-primary">
+                      {viewRecord.chemist_name || '—'}
+                    </div>
+                    <p className="text-xs text-text-secondary">Chemist</p>
+                  </div>
+                  <div className="text-xs text-text-secondary italic">
+                    Created by: {viewRecord.created_by_name ?? '—'}
+                  </div>
+                  <div className="text-center">
+                    <div className="w-48 border-b border-secondary-400 mb-1 pb-1 text-sm font-medium text-text-primary">
+                      {viewRecord.qc_manager_name || '—'}
+                    </div>
+                    <p className="text-xs text-text-secondary">QC Manager</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Close Button ── */}
+              <div className="flex justify-end px-6 py-3 border-t border-secondary-100 bg-secondary-50 flex-shrink-0">
+                <Button variant="outline" onClick={() => setViewRecord(null)}>Close</Button>
+              </div>
+            </Card>
           </motion.div>
         </div>
       )}

@@ -620,7 +620,7 @@ export default function PackingMilkReportPage() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm" style={{ minWidth: 1400 }}>
+                <table className="w-full text-sm records-table" style={{ minWidth: 1400 }}>
                   <thead>
                     <tr className="bg-gradient-to-r from-violet-50 to-purple-50 border-b border-violet-100">
                       {[
@@ -722,61 +722,112 @@ export default function PackingMilkReportPage() {
 
       {/* ── View Modal ─────────────────────────────────────────────────────── */}
       {viewRecord && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setViewRecord(null)}>
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white dark:bg-secondary-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-5xl max-h-[90vh] flex flex-col"
           >
-            <div className="p-6 border-b border-secondary-100">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-text-primary flex items-center gap-2">
-                  <Package className="w-5 h-5 text-violet-600" />
-                  Packing Milk Report Details
-                </h2>
-                <button onClick={() => setViewRecord(null)} className="text-text-secondary hover:text-text-primary text-xl font-bold">✕</button>
-              </div>
-            </div>
-            <div className="p-6">
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                {[
-                  ['Date', formatDate(viewRecord.date)],
-                  ['Testing Time', viewRecord.testing_time ?? '—'],
-                  ['Tank No', viewRecord.tank_no],
-                  ['Batch No', viewRecord.batch_no],
-                  ['Packing Head', viewRecord.packing_head],
-                  ['Product Name', viewRecord.product_name],
-                  ['Temperature (°C)', viewRecord.temp_celsius ?? '—'],
-                  ['Acidity %', viewRecord.acidity_percent ?? '—'],
-                  ['Alcohol Result', viewRecord.alcohol_result ?? '—'],
-                  ['FAT %', viewRecord.fat_percent ?? '—'],
-                  ['CLR', viewRecord.clr ?? '—'],
-                  ['SNF %', viewRecord.snf_percent ?? '—'],
-                  ['Phosphatase Test', viewRecord.phosphatase_test ?? '—'],
-                  ['BR', viewRecord.br ?? '—'],
-                  ['pH', viewRecord.ph ?? '—'],
-                  ['TS', viewRecord.ts ?? '—'],
-                  ['Protein %', viewRecord.protein_percent ?? '—'],
-                  ['Chemist', viewRecord.chemist_name ?? '—'],
-                  ['Quality Incharge', viewRecord.quality_incharge_name ?? '—'],
-                ].map(([label, value]) => (
-                  <div key={String(label)} className="flex flex-col gap-0.5">
-                    <span className="text-xs text-text-secondary font-medium">{label}</span>
-                    <span className="text-text-primary font-semibold">{String(value)}</span>
+            <Card className="p-0 overflow-hidden flex flex-col h-full">
+              {/* ── Modal Header ── */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-secondary-200 bg-gradient-to-r from-violet-50 to-purple-50 flex-shrink-0">
+                <div>
+                  <h2 className="text-lg font-bold text-violet-800 tracking-wide uppercase">
+                    Packing Milk Report
+                  </h2>
+                  <div className="flex items-center gap-4 mt-1 text-xs text-violet-700 font-medium">
+                    <span>Date: <strong>{formatDate(viewRecord.date)}</strong></span>
                   </div>
-                ))}
-                {viewRecord.remark && (
-                  <div className="col-span-2 flex flex-col gap-0.5">
-                    <span className="text-xs text-text-secondary font-medium">Remark</span>
-                    <span className="text-text-primary">{viewRecord.remark}</span>
+                </div>
+                <button
+                  onClick={() => setViewRecord(null)}
+                  className="p-2 rounded-lg hover:bg-violet-100 text-violet-700 transition-colors text-lg font-bold"
+                >✕</button>
+              </div>
+
+              {/* ── Paper-format Table ── */}
+              <div className="overflow-x-auto overflow-y-auto flex-1 px-4 py-4">
+                <table className="records-table w-full text-xs" style={{ minWidth: 1000 }}>
+                  <thead>
+                    <tr>
+                      <th style={{ width: 32 }}>Sr. No.</th>
+                      <th>Testing Time</th>
+                      <th>Tank No.</th>
+                      <th>Batch No.</th>
+                      <th>Packing Head</th>
+                      <th>Product Name</th>
+                      <th>Temp (°C)</th>
+                      <th>Acidity (%)</th>
+                      <th>Alcohol</th>
+                      <th>FAT (%)</th>
+                      <th>CLR</th>
+                      <th>SNF (%)</th>
+                      <th>Phosphatase Test</th>
+                      <th>BR</th>
+                      <th>pH</th>
+                      <th>T.S. (%)</th>
+                      <th>Protein (%)</th>
+                      <th>Remark</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="text-center font-semibold">1</td>
+                      <td>{viewRecord.testing_time ?? '—'}</td>
+                      <td className="font-semibold">{viewRecord.tank_no}</td>
+                      <td>{viewRecord.batch_no}</td>
+                      <td>{viewRecord.packing_head}</td>
+                      <td className="font-semibold">{viewRecord.product_name}</td>
+                      <td>{viewRecord.temp_celsius ?? '—'}</td>
+                      <td>{viewRecord.acidity_percent ?? '—'}</td>
+                      <td>{viewRecord.alcohol_result ?? '—'}</td>
+                      <td>{viewRecord.fat_percent ?? '—'}</td>
+                      <td>{viewRecord.clr ?? '—'}</td>
+                      <td>{viewRecord.snf_percent ?? '—'}</td>
+                      <td>{viewRecord.phosphatase_test ?? '—'}</td>
+                      <td>{viewRecord.br ?? '—'}</td>
+                      <td>{viewRecord.ph ?? '—'}</td>
+                      <td>{viewRecord.ts ?? '—'}</td>
+                      <td>{viewRecord.protein_percent ?? '—'}</td>
+                      <td>{viewRecord.remark ?? '—'}</td>
+                    </tr>
+                    {/* Empty rows to match paper format */}
+                    {[...Array(3)].map((_, i) => (
+                      <tr key={i} className="h-8">
+                        <td className="text-center text-secondary-300">{i + 2}</td>
+                        {[...Array(17)].map((__, j) => <td key={j}>&nbsp;</td>)}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* ── Footer: Signatures ── */}
+              <div className="border-t border-secondary-200 px-6 py-4 flex-shrink-0 bg-white">
+                <div className="flex items-end justify-between flex-wrap gap-4">
+                  <div className="text-center">
+                    <div className="w-40 border-b border-secondary-400 mb-1 pb-1 text-sm font-medium text-text-primary">
+                      {viewRecord.chemist_name || '—'}
+                    </div>
+                    <p className="text-xs text-text-secondary">Chemist</p>
                   </div>
-                )}
+                  <div className="text-xs text-text-secondary italic">
+                    Created by: {viewRecord.created_by_name ?? '—'}
+                  </div>
+                  <div className="text-center">
+                    <div className="w-48 border-b border-secondary-400 mb-1 pb-1 text-sm font-medium text-text-primary">
+                      {viewRecord.quality_incharge_name || '—'}
+                    </div>
+                    <p className="text-xs text-text-secondary">Quality Incharge</p>
+                  </div>
+                </div>
               </div>
-              <div className="mt-6 flex justify-end">
-                <Button onClick={() => setViewRecord(null)}>Close</Button>
+
+              {/* ── Close Button ── */}
+              <div className="flex justify-end px-6 py-3 border-t border-secondary-100 bg-secondary-50 flex-shrink-0">
+                <Button variant="outline" onClick={() => setViewRecord(null)}>Close</Button>
               </div>
-            </div>
+            </Card>
           </motion.div>
         </div>
       )}

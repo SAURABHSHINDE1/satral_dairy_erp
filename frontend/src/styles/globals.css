@@ -111,6 +111,80 @@
   transition-duration: 200ms;
 }
 
+/* ─── Records Table ─────────────────────────────────────────────────────── */
+.records-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.records-table thead tr {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.records-table thead th {
+  border: 1px solid #e2e8f0;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  background: #f8fafc;
+  color: #64748b;
+}
+
+.records-table tbody tr {
+  transition: background 0.15s;
+}
+
+.records-table tbody tr:nth-child(even) {
+  background-color: #f8fafc;
+}
+
+.records-table tbody tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+
+.records-table tbody tr:hover {
+  background-color: #eff6ff !important;
+}
+
+.records-table tbody td {
+  border: 1px solid #e2e8f0;
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  color: #374151;
+  vertical-align: middle;
+}
+
+/* Dark mode */
+.dark .records-table thead th {
+  background: #1e293b;
+  color: #94a3b8;
+  border-color: #334155;
+}
+
+.dark .records-table tbody tr:nth-child(even) {
+  background-color: #1e293b;
+}
+
+.dark .records-table tbody tr:nth-child(odd) {
+  background-color: #0f172a;
+}
+
+.dark .records-table tbody tr:hover {
+  background-color: #1d3461 !important;
+}
+
+.dark .records-table tbody td {
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
 /* Print styles */
 @media print {
   .no-print {
