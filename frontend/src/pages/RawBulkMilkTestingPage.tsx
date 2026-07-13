@@ -11,7 +11,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { rawBulkMilkService } from '../services/rawBulkMilk.service';
 import type { RawBulkMilkRecord, RawBulkMilkFormData } from '../types';
-import { formatDate } from '../lib/utils';
+import { formatDate, downloadReportAsExcel } from '../lib/utils';
 import { useAuthStore } from '../store/auth.store';
 
 // ─── Preset options ────────────────────────────────────────────────────────────
@@ -251,28 +251,45 @@ export default function RawBulkMilkTestingPage() {
     }
   };
 
-  // ── CSV Export ────────────────────────────────────────────────────────────────
+  // ── Excel Export ──────────────────────────────────────────────────────────────
   const handleExport = () => {
-    const headers = [
-      'Date', 'Testing Time', 'Sample Name', 'Type of Milk', 'Quantity (Lit)',
-      'Temp °C', 'OT', 'Acidity %', 'Alcohol', 'FAT %', 'CLR', 'SNF',
-      'Protein %', 'Sodium/Electrolyte', 'pH', 'Chemist', 'Quality Incharge',
-    ];
-    const csvRows = filteredRecords.map((r) => [
-      r.date, r.testing_time ?? '', r.sample_name, r.type_of_milk,
-      r.milk_quantity_lit ?? '', r.temp_celsius ?? '', r.ot ?? '',
-      r.acidity_percent ?? '', r.alcohol_result ?? '', r.fat_percent ?? '',
-      r.clr ?? '', r.snf ?? '', r.protein_percent ?? '',
-      r.sodium_electrolyte_condition ?? '', r.ph ?? '',
-      r.chemist_name ?? '', r.quality_incharge_name ?? '',
-    ]);
-    const csv = [headers, ...csvRows].map((r) => r.join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `raw_bulk_milk_${filterDate || 'all'}.csv`;
-    a.click();
+    downloadReportAsExcel({
+      title: 'Raw Bulk Milk Testing Record',
+      metadata: [
+        { label: 'Export Date', value: formatDate(new Date()) },
+        { label: 'Filters', value: `Date: ${filterDate || 'All'}` },
+      ],
+      headers: [
+        'Sr. No.', 'Date', 'Testing Time', 'Sample Name', 'Type of Milk', 'Milk Qty (L)',
+        'Temp (°C)', 'OT', 'Acidity (%)', 'Alcohol', 'FAT (%)',
+        'CLR', 'SNF', 'Protein (%)', 'Sodium Electrolyte Condition', 'PH', 'Chemist', 'Quality Incharge'
+      ],
+      rows: filteredRecords.map((r, i) => [
+        i + 1,
+        formatDate(r.date),
+        r.testing_time ?? '—',
+        r.sample_name,
+        r.type_of_milk,
+        r.milk_quantity_lit ?? '—',
+        r.temp_celsius ?? '—',
+        r.ot ?? '—',
+        r.acidity_percent ?? '—',
+        r.alcohol_result ?? '—',
+        r.fat_percent ?? '—',
+        r.clr ?? '—',
+        r.snf ?? '—',
+        r.protein_percent ?? '—',
+        r.sodium_electrolyte_condition ?? '—',
+        r.ph ?? '—',
+        r.chemist_name ?? '—',
+        r.quality_incharge_name ?? '—'
+      ]),
+      signatures: {
+        chemist: '',
+        reviewer: '',
+        reviewerTitle: 'Quality Incharge'
+      }
+    });
   };
 
   // ── Column definitions for the table ──────────────────────────────────────────
@@ -312,7 +329,7 @@ export default function RawBulkMilkTestingPage() {
           </Button>
           {activeTab === 'records' && (
             <Button variant="outline" onClick={handleExport}>
-              <Download className="w-4 h-4 mr-2" />Export CSV
+              <Download className="w-4 h-4 mr-2" />Export Excel
             </Button>
           )}
         </div>
@@ -743,13 +760,6 @@ export default function RawBulkMilkTestingPage() {
                       <td>{viewRecord.sodium_electrolyte_condition ?? '—'}</td>
                       <td>{viewRecord.ph?.toFixed(2) ?? '—'}</td>
                     </tr>
-                    {/* Empty rows to match paper format */}
-                    {[...Array(3)].map((_, i) => (
-                      <tr key={i} className="h-8">
-                        <td className="text-center text-secondary-300">{i + 2}</td>
-                        {[...Array(14)].map((__, j) => <td key={j}>&nbsp;</td>)}
-                      </tr>
-                    ))}
                   </tbody>
                 </table>
               </div>
@@ -776,7 +786,47 @@ export default function RawBulkMilkTestingPage() {
               </div>
 
               {/* ── Close Button ── */}
-              <div className="flex justify-end px-6 py-3 border-t border-secondary-100 bg-secondary-50 flex-shrink-0">
+              <div className="flex justify-end gap-3 px-6 py-3 border-t border-secondary-100 bg-secondary-50 flex-shrink-0">
+                <Button
+                  onClick={() => {
+                    downloadReportAsExcel({
+                      title: 'Raw Bulk Milk Testing Record',
+                      metadata: [
+                        { label: 'Date', value: formatDate(viewRecord.date) }
+                      ],
+                      headers: [
+                        'Sr. No.', 'Testing Time', 'Sample Name', 'Type of Milk', 'Milk Qty (L)',
+                        'Temp (°C)', 'OT', 'Acidity (%)', 'Alcohol', 'FAT (%)',
+                        'CLR', 'SNF', 'Protein (%)', 'Sodium Electrolyte Condition', 'PH'
+                      ],
+                      rows: [[
+                        1,
+                        viewRecord.testing_time ?? '—',
+                        viewRecord.sample_name,
+                        viewRecord.type_of_milk,
+                        viewRecord.milk_quantity_lit ?? '—',
+                        viewRecord.temp_celsius ?? '—',
+                        viewRecord.ot ?? '—',
+                        viewRecord.acidity_percent ?? '—',
+                        viewRecord.alcohol_result ?? '—',
+                        viewRecord.fat_percent ?? '—',
+                        viewRecord.clr ?? '—',
+                        viewRecord.snf ?? '—',
+                        viewRecord.protein_percent ?? '—',
+                        viewRecord.sodium_electrolyte_condition ?? '—',
+                        viewRecord.ph ?? '—'
+                      ]],
+                      signatures: {
+                        chemist: viewRecord.chemist_name,
+                        reviewer: viewRecord.quality_incharge_name,
+                        reviewerTitle: 'Quality Incharge'
+                      }
+                    });
+                  }}
+                  className="bg-emerald-650 hover:bg-emerald-700 text-white font-medium shadow-sm transition-all"
+                >
+                  Download Excel
+                </Button>
                 <Button variant="outline" onClick={() => setViewRecord(null)}>Close</Button>
               </div>
             </Card>

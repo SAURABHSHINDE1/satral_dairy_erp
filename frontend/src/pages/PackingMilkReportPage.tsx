@@ -10,7 +10,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { packingMilkReportService } from '../services/packingMilkReport.service';
 import type { PackingMilkReport, PackingMilkFormData } from '../types';
-import { formatDate } from '../lib/utils';
+import { formatDate, downloadReportAsExcel } from '../lib/utils';
 
 // ─── Preset options ────────────────────────────────────────────────────────────
 const PRODUCT_NAME_PRESETS = [
@@ -245,6 +245,51 @@ export default function PackingMilkReportPage() {
     }
   };
 
+  // ── Excel Export ───────────────────────────────────────────────────────────────
+  const handleExport = () => {
+    downloadReportAsExcel({
+      title: 'Packing Milk Report',
+      metadata: [
+        { label: 'Export Date', value: formatDate(new Date()) },
+        { label: 'Filters', value: `Date: ${filterDate || 'All'}` },
+      ],
+      headers: [
+        'Sr. No.', 'Date', 'Testing Time', 'Tank No.', 'Batch No.', 'Packing Head',
+        'Product Name', 'Temp (°C)', 'Acidity (%)', 'Alcohol', 'FAT (%)',
+        'CLR', 'SNF (%)', 'Phosphatase Test', 'BR', 'pH', 'T.S. (%)',
+        'Protein (%)', 'Remark', 'Chemist', 'Quality Incharge'
+      ],
+      rows: filteredRecords.map((r, i) => [
+        i + 1,
+        formatDate(r.date),
+        r.testing_time ?? '—',
+        r.tank_no,
+        r.batch_no,
+        r.packing_head,
+        r.product_name,
+        r.temp_celsius ?? '—',
+        r.acidity_percent ?? '—',
+        r.alcohol_result ?? '—',
+        r.fat_percent ?? '—',
+        r.clr ?? '—',
+        r.snf_percent ?? '—',
+        r.phosphatase_test ?? '—',
+        r.br ?? '—',
+        r.ph ?? '—',
+        r.ts ?? '—',
+        r.protein_percent ?? '—',
+        r.remark ?? '—',
+        r.chemist_name ?? '—',
+        r.quality_incharge_name ?? '—'
+      ]),
+      signatures: {
+        chemist: '',
+        reviewer: '',
+        reviewerTitle: 'Quality Incharge'
+      }
+    });
+  };
+
   // ── Edit save ─────────────────────────────────────────────────────────────────
   const handleEditSave = async () => {
     if (!editRecord) return;
@@ -260,31 +305,6 @@ export default function PackingMilkReportPage() {
     } finally {
       setEditSaving(false);
     }
-  };
-
-  // ── CSV Export ─────────────────────────────────────────────────────────────────
-  const handleExport = () => {
-    const headers = [
-      'Date', 'Time', 'Tank No', 'Batch No', 'Packing Head', 'Product Name',
-      'Temp °C', 'Acidity %', 'Alcohol', 'FAT %', 'CLR', 'SNF %',
-      'Phosphatase', 'BR', 'pH', 'TS', 'Protein %', 'Remark',
-      'Chemist', 'Quality Incharge',
-    ];
-    const csvRows = filteredRecords.map((r) => [
-      r.date, r.testing_time ?? '', r.tank_no, r.batch_no, r.packing_head, r.product_name,
-      r.temp_celsius ?? '', r.acidity_percent ?? '', r.alcohol_result ?? '',
-      r.fat_percent ?? '', r.clr ?? '', r.snf_percent ?? '',
-      r.phosphatase_test ?? '', r.br ?? '', r.ph ?? '', r.ts ?? '', r.protein_percent ?? '',
-      r.remark ?? '', r.chemist_name ?? '', r.quality_incharge_name ?? '',
-    ]);
-    const csv = [headers, ...csvRows].map((row) => row.join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `packing_milk_report_${filterDate || 'all'}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
   };
 
   // ── Column definitions ────────────────────────────────────────────────────────
@@ -326,7 +346,7 @@ export default function PackingMilkReportPage() {
           </Button>
           {activeTab === 'records' && (
             <Button variant="outline" onClick={handleExport}>
-              <Download className="w-4 h-4 mr-2" />Export CSV
+              <Download className="w-4 h-4 mr-2" />Export Excel
             </Button>
           )}
         </div>
@@ -791,13 +811,6 @@ export default function PackingMilkReportPage() {
                       <td>{viewRecord.protein_percent ?? '—'}</td>
                       <td>{viewRecord.remark ?? '—'}</td>
                     </tr>
-                    {/* Empty rows to match paper format */}
-                    {[...Array(3)].map((_, i) => (
-                      <tr key={i} className="h-8">
-                        <td className="text-center text-secondary-300">{i + 2}</td>
-                        {[...Array(17)].map((__, j) => <td key={j}>&nbsp;</td>)}
-                      </tr>
-                    ))}
                   </tbody>
                 </table>
               </div>
@@ -824,7 +837,51 @@ export default function PackingMilkReportPage() {
               </div>
 
               {/* ── Close Button ── */}
-              <div className="flex justify-end px-6 py-3 border-t border-secondary-100 bg-secondary-50 flex-shrink-0">
+              <div className="flex justify-end gap-3 px-6 py-3 border-t border-secondary-100 bg-secondary-50 flex-shrink-0">
+                <Button
+                  onClick={() => {
+                    downloadReportAsExcel({
+                      title: 'Packing Milk Report',
+                      metadata: [
+                        { label: 'Date', value: formatDate(viewRecord.date) }
+                      ],
+                      headers: [
+                        'Sr. No.', 'Testing Time', 'Tank No.', 'Batch No.', 'Packing Head',
+                        'Product Name', 'Temp (°C)', 'Acidity (%)', 'Alcohol', 'FAT (%)',
+                        'CLR', 'SNF (%)', 'Phosphatase Test', 'BR', 'pH', 'T.S. (%)',
+                        'Protein (%)', 'Remark'
+                      ],
+                      rows: [[
+                        1,
+                        viewRecord.testing_time ?? '—',
+                        viewRecord.tank_no,
+                        viewRecord.batch_no,
+                        viewRecord.packing_head,
+                        viewRecord.product_name,
+                        viewRecord.temp_celsius ?? '—',
+                        viewRecord.acidity_percent ?? '—',
+                        viewRecord.alcohol_result ?? '—',
+                        viewRecord.fat_percent ?? '—',
+                        viewRecord.clr ?? '—',
+                        viewRecord.snf_percent ?? '—',
+                        viewRecord.phosphatase_test ?? '—',
+                        viewRecord.br ?? '—',
+                        viewRecord.ph ?? '—',
+                        viewRecord.ts ?? '—',
+                        viewRecord.protein_percent ?? '—',
+                        viewRecord.remark ?? '—'
+                      ]],
+                      signatures: {
+                        chemist: viewRecord.chemist_name,
+                        reviewer: viewRecord.quality_incharge_name,
+                        reviewerTitle: 'Quality Incharge'
+                      }
+                    });
+                  }}
+                  className="bg-violet-600 hover:bg-violet-750 text-white font-medium shadow-sm transition-all"
+                >
+                  Download Excel
+                </Button>
                 <Button variant="outline" onClick={() => setViewRecord(null)}>Close</Button>
               </div>
             </Card>

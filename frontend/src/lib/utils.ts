@@ -50,3 +50,94 @@ export function getStatusLabel(status: string): string {
   };
   return labels[status] || status;
 }
+
+export function downloadReportAsExcel({
+  title,
+  metadata,
+  headers,
+  rows,
+  signatures
+}: {
+  title: string;
+  metadata: { label: string; value: string }[];
+  headers: string[];
+  rows: any[][];
+  signatures: { chemist: string; reviewer: string; reviewerTitle?: string };
+}) {
+  const metaHtml = metadata
+    .map(m => `<tr><td style="font-weight:bold; font-size:11px; padding: 2px;">${m.label}:</td><td style="font-size:11px; padding: 2px;">${m.value}</td></tr>`)
+    .join('');
+
+  const headersHtml = headers
+    .map(h => `<th style="border: 1px solid #000000; background-color: #f2f2f2; font-weight: bold; font-size: 11px; padding: 6px 10px; text-align: center;">${h}</th>`)
+    .join('');
+
+  const rowsHtml = rows
+    .map(r => {
+      const cells = r
+        .map(cell => `<td style="border: 1px solid #000000; font-size: 11px; padding: 6px 10px; text-align: center;">${cell ?? '—'}</td>`)
+        .join('');
+      return `<tr>${cells}</tr>`;
+    })
+    .join('');
+
+  const chemistName = signatures.chemist || '—';
+  const reviewerName = signatures.reviewer || '—';
+  const reviewerTitle = signatures.reviewerTitle || 'Quality Incharge';
+
+  const html = `
+    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body { font-family: Arial, sans-serif; }
+      </style>
+    </head>
+    <body>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+        <tr>
+          <td colspan="${headers.length}" style="text-align: center; font-size: 16px; font-weight: bold; padding: 12px; border: 1px solid #000000; background-color: #e2e8f0; text-transform: uppercase;">
+            ${title}
+          </td>
+        </tr>
+      </table>
+
+      <table style="border-collapse: collapse; margin-bottom: 15px;">
+        ${metaHtml}
+      </table>
+
+      <table style="border-collapse: collapse; width: 100%;">
+        <thead>
+          <tr>${headersHtml}</tr>
+        </thead>
+        <tbody>
+          ${rowsHtml}
+        </tbody>
+      </table>
+
+      <table style="width: 100%; border-collapse: collapse; margin-top: 40px;">
+        <tr>
+          <td colspan="2" style="width: 40%; text-align: center; font-size: 11px;">
+            <div style="border-bottom: 1px solid #000000; font-weight: bold; padding-bottom: 5px;">${chemistName}</div>
+            <div style="margin-top: 5px;">Chemist</div>
+          </td>
+          <td colspan="${headers.length - 4}">&nbsp;</td>
+          <td colspan="2" style="width: 40%; text-align: center; font-size: 11px;">
+            <div style="border-bottom: 1px solid #000000; font-weight: bold; padding-bottom: 5px;">${reviewerName}</div>
+            <div style="margin-top: 5px;">${reviewerTitle}</div>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `;
+
+  const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '_')}_report.xls`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+

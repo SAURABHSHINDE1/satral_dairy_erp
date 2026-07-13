@@ -66,7 +66,7 @@ export function Sidebar() {
             : { width: sidebarOpen ? 256 : 80, x: 0 }
         }
         transition={{ duration: 0.3, ease: 'easeInOut' }}
-        className="fixed left-0 top-0 h-full bg-white dark:bg-secondary-900 border-r border-secondary-200 dark:border-secondary-700 shadow-soft z-50"
+        className="fixed left-0 top-0 h-full bg-white dark:bg-secondary-900 border-r border-secondary-200 dark:border-secondary-700 shadow-soft z-50 overflow-x-hidden"
       >
         <div className="flex flex-col h-full">
           <div className={cn(
@@ -102,7 +102,7 @@ export function Sidebar() {
             </button>
           </div>
 
-          <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+          <nav className="flex-1 p-4 space-y-2 overflow-y-auto overflow-x-hidden">
             {filteredMenuItems.map((item) => {
               const Icon = item.icon;
 
@@ -114,7 +114,7 @@ export function Sidebar() {
                   className={({ isActive }) =>
                     cn(
                       'flex items-center rounded-lg transition-all duration-200',
-                      (sidebarOpen || isMobile) ? 'gap-3 px-4 py-3' : 'justify-center p-3',
+                      (sidebarOpen || isMobile) ? 'px-4 py-3' : 'justify-center p-3',
                       isActive
                         ? 'bg-primary-50 dark:bg-secondary-800 text-primary-600 dark:text-primary-400 font-medium'
                         : 'text-text-secondary hover:bg-secondary-100 dark:hover:bg-secondary-800 hover:text-text-primary'
@@ -122,18 +122,14 @@ export function Sidebar() {
                   }
                 >
                   <Icon className="w-5 h-5 flex-shrink-0" />
-                  <AnimatePresence mode="wait">
-                    {(sidebarOpen || isMobile) && (
-                      <motion.span
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -10 }}
-                        className="whitespace-nowrap"
-                      >
-                        {item.label}
-                      </motion.span>
+                  <span
+                    className={cn(
+                      'transition-all duration-200 whitespace-nowrap overflow-hidden',
+                      (sidebarOpen || isMobile) ? 'w-auto opacity-100 ml-3' : 'w-0 opacity-0'
                     )}
-                  </AnimatePresence>
+                  >
+                    {item.label}
+                  </span>
                 </NavLink>
               );
             })}

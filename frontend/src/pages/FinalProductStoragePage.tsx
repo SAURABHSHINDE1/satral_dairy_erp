@@ -12,7 +12,7 @@ import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
 import { finalProductService } from '../services/finalProduct.service';
 import type { FinalProductRecord, FinalProductFormData } from '../types';
-import { formatDate } from '../lib/utils';
+import { formatDate, downloadReportAsExcel } from '../lib/utils';
 import { useAuthStore } from '../store/auth.store';
 
 // ─── Safe UUID generator (works on HTTP / non-secure origins) ───────────────
@@ -248,30 +248,47 @@ export default function FinalProductStoragePage() {
     }
   };
 
-  // ── CSV Export ─────────────────────────────────────────────────────────────
+  // ── Excel Export ───────────────────────────────────────────────────────────
   const handleExport = () => {
-    const headers = [
-      'Date', 'Shift', 'Testing Time', 'Tank No', 'Milk Type',
-      'Qty (L)', 'Temp (°C)', 'Flavour/Taste', 'Acidity %', 'Alcohol',
-      'FAT %', 'CLR', 'SNF %', 'Efficiency %', 'Protein %',
-      'Electrolyte', 'Remark', 'Chemist', 'Quality Incharge'
-    ];
-    const csvRows = filteredRecords.map((r) => [
-      r.date, r.shift, r.testing_time ?? '', r.tank_no, r.type_of_milk,
-      r.milk_quantity_l ?? '', r.temp_celsius ?? '', r.flavour_taste ?? '',
-      r.acidity_percent ?? '', r.alcohol_result ?? '',
-      r.fat_percent ?? '', r.clr ?? '', r.snf_percent ?? '',
-      r.efficiency_percent ?? '', r.protein_percent ?? '',
-      r.electrolyte_condition ?? '', r.remark ?? '',
-      r.chemist_name ?? '', r.quality_incharge_name ?? '',
-    ]);
-    const csv = [headers, ...csvRows].map((r) => r.join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `final_product_${filterDate || 'all'}_${filterShift}.csv`;
-    a.click();
+    downloadReportAsExcel({
+      title: 'Final Product Storage Tank Record',
+      metadata: [
+        { label: 'Export Date', value: formatDate(new Date()) },
+        { label: 'Filters', value: `Date: ${filterDate || 'All'}, Shift: ${filterShift}` },
+      ],
+      headers: [
+        'Sr. No.', 'Date', 'Shift', 'Testing Time', 'Tank No.', 'Type of Milk', 'Milk Qty (L)',
+        'Temp (°C)', 'Flavour / Taste', 'Acidity (%)', 'Alcohol', 'FAT (%)',
+        'CLR', 'SNF (%)', 'Efficiency (%)', 'Protein (%)', 'Electrolyte', 'Remark', 'Chemist', 'Quality Incharge'
+      ],
+      rows: filteredRecords.map((r, i) => [
+        i + 1,
+        formatDate(r.date),
+        r.shift,
+        r.testing_time ?? '—',
+        r.tank_no,
+        r.type_of_milk,
+        r.milk_quantity_l ?? '—',
+        r.temp_celsius ?? '—',
+        r.flavour_taste ?? '—',
+        r.acidity_percent ?? '—',
+        r.alcohol_result ?? '—',
+        r.fat_percent ?? '—',
+        r.clr ?? '—',
+        r.snf_percent ?? '—',
+        r.efficiency_percent ?? '—',
+        r.protein_percent ?? '—',
+        r.electrolyte_condition ?? '—',
+        r.remark ?? '—',
+        r.chemist_name ?? '—',
+        r.quality_incharge_name ?? '—'
+      ]),
+      signatures: {
+        chemist: '',
+        reviewer: '',
+        reviewerTitle: 'Quality Incharge'
+      }
+    });
   };
 
   // ── Column header def ──────────────────────────────────────────────────────
@@ -315,7 +332,7 @@ export default function FinalProductStoragePage() {
           </Button>
           <Button variant="outline" onClick={handleExport}>
             <Download className="w-4 h-4 mr-2" />
-            Export CSV
+            Export Excel
           </Button>
         </div>
       </div>
@@ -753,13 +770,6 @@ export default function FinalProductStoragePage() {
                       <td>{viewRecord.electrolyte_condition ?? '—'}</td>
                       <td>{viewRecord.remark ?? '—'}</td>
                     </tr>
-                    {/* Empty rows to match paper format */}
-                    {[...Array(3)].map((_, i) => (
-                      <tr key={i} className="h-8">
-                        <td className="text-center text-secondary-300">{i + 2}</td>
-                        {[...Array(15)].map((__, j) => <td key={j}>&nbsp;</td>)}
-                      </tr>
-                    ))}
                   </tbody>
                 </table>
               </div>
@@ -786,7 +796,49 @@ export default function FinalProductStoragePage() {
               </div>
 
               {/* ── Close Button ── */}
-              <div className="flex justify-end px-6 py-3 border-t border-secondary-100 bg-secondary-50 flex-shrink-0">
+              <div className="flex justify-end gap-3 px-6 py-3 border-t border-secondary-100 bg-secondary-50 flex-shrink-0">
+                <Button
+                  onClick={() => {
+                    downloadReportAsExcel({
+                      title: 'Final Product Storage Tank Record',
+                      metadata: [
+                        { label: 'Date', value: formatDate(viewRecord.date) },
+                        { label: 'Shift', value: viewRecord.shift },
+                      ],
+                      headers: [
+                        'Sr. No.', 'Testing Time', 'Tank No.', 'Type of Milk', 'Milk Qty (L)',
+                        'Temp (°C)', 'Flavour / Taste', 'Acidity (%)', 'Alcohol', 'FAT (%)',
+                        'CLR', 'SNF (%)', 'Efficiency (%)', 'Protein (%)', 'Electrolyte', 'Remark'
+                      ],
+                      rows: [[
+                        1,
+                        viewRecord.testing_time ?? '—',
+                        viewRecord.tank_no,
+                        viewRecord.type_of_milk,
+                        viewRecord.milk_quantity_l ?? '—',
+                        viewRecord.temp_celsius ?? '—',
+                        viewRecord.flavour_taste ?? '—',
+                        viewRecord.acidity_percent ?? '—',
+                        viewRecord.alcohol_result ?? '—',
+                        viewRecord.fat_percent ?? '—',
+                        viewRecord.clr ?? '—',
+                        viewRecord.snf_percent ?? '—',
+                        viewRecord.efficiency_percent ?? '—',
+                        viewRecord.protein_percent ?? '—',
+                        viewRecord.electrolyte_condition ?? '—',
+                        viewRecord.remark ?? '—'
+                      ]],
+                      signatures: {
+                        chemist: viewRecord.chemist_name,
+                        reviewer: viewRecord.quality_incharge_name,
+                        reviewerTitle: 'Quality Incharge'
+                      }
+                    });
+                  }}
+                  className="bg-emerald-650 hover:bg-emerald-700 text-white font-medium shadow-sm transition-all"
+                >
+                  Download Excel
+                </Button>
                 <Button variant="outline" onClick={() => setViewRecord(null)}>Close</Button>
               </div>
             </Card>

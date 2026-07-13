@@ -10,7 +10,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { milkTakenReportBiProductService } from '../services/milkTakenReportBiProduct.service';
 import type { MilkTakenReportBiProduct, MilkTakenReportBiProductFormData } from '../types';
-import { formatDate } from '../lib/utils';
+import { formatDate, downloadReportAsExcel } from '../lib/utils';
 
 // ─── Preset options ────────────────────────────────────────────────────────────
 const PRODUCT_NAME_PRESETS = [
@@ -239,28 +239,43 @@ export default function MilkTakenReportByProduct() {
     }
   };
 
-  // ── CSV Export ─────────────────────────────────────────────────────────────────
+  // ── Excel Export ─────────────────────────────────────────────────────────────────
   const handleExport = () => {
-    const headers = [
-      'Date', 'Product Name', 'Time', 'Temp °C', 'OT', 'Acidity %',
-      'Alcohol', 'FAT %', 'CLR', 'SNF %', 'Neutralizer/Adultration',
-      'Na/Electrolyte', 'pH', 'Chemist', 'QC Manager',
-    ];
-    const csvRows = filteredRecords.map((r) => [
-      r.date, r.product_name, r.testing_time ?? '', r.temp_celsius ?? '',
-      r.ot ?? '', r.acidity_percent ?? '', r.alcohol_result ?? '',
-      r.fat_percent ?? '', r.clr ?? '', r.snf_percent ?? '',
-      r.neutralizer_adultration ?? '', r.sodium_electrolyte_condition ?? '',
-      r.ph ?? '', r.chemist_name ?? '', r.qc_manager_name ?? '',
-    ]);
-    const csv = [headers, ...csvRows].map((row) => row.join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href     = url;
-    a.download = `milk_taken_bi_product_${filterDate || 'all'}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadReportAsExcel({
+      title: 'Milk Taken Report For Bi-Product',
+      metadata: [
+        { label: 'Export Date', value: formatDate(new Date()) },
+        { label: 'Filters', value: `Date: ${filterDate || 'All'}` },
+      ],
+      headers: [
+        'Sr. No.', 'Date', 'Product Name', 'Testing Time', 'Temp (°C)', 'OT',
+        'Acidity (%)', 'Alcohol', 'FAT (%)', 'CLR', 'SNF (%)',
+        'Neutralizer', 'Na / Electrolyte', 'pH', 'Chemist', 'QC Manager'
+      ],
+      rows: filteredRecords.map((r, i) => [
+        i + 1,
+        formatDate(r.date),
+        r.product_name,
+        r.testing_time ?? '—',
+        r.temp_celsius ?? '—',
+        r.ot ?? '—',
+        r.acidity_percent ?? '—',
+        r.alcohol_result ?? '—',
+        r.fat_percent ?? '—',
+        r.clr ?? '—',
+        r.snf_percent ?? '—',
+        r.neutralizer_adultration ?? '—',
+        r.sodium_electrolyte_condition ?? '—',
+        r.ph ?? '—',
+        r.chemist_name ?? '—',
+        r.qc_manager_name ?? '—'
+      ]),
+      signatures: {
+        chemist: '',
+        reviewer: '',
+        reviewerTitle: 'QC Manager'
+      }
+    });
   };
 
   // ── Column definitions ────────────────────────────────────────────────────────
@@ -298,7 +313,7 @@ export default function MilkTakenReportByProduct() {
           </Button>
           {activeTab === 'records' && (
             <Button variant="outline" onClick={handleExport}>
-              <Download className="w-4 h-4 mr-2" />Export CSV
+              <Download className="w-4 h-4 mr-2" />Export Excel
             </Button>
           )}
         </div>
@@ -746,13 +761,6 @@ export default function MilkTakenReportByProduct() {
                       <td>{viewRecord.sodium_electrolyte_condition ?? '—'}</td>
                       <td>{viewRecord.ph?.toFixed(2) ?? '—'}</td>
                     </tr>
-                    {/* Empty rows to match paper format */}
-                    {[...Array(3)].map((_, i) => (
-                      <tr key={i} className="h-8">
-                        <td className="text-center text-secondary-300">{i + 2}</td>
-                        {[...Array(12)].map((__, j) => <td key={j}>&nbsp;</td>)}
-                      </tr>
-                    ))}
                   </tbody>
                 </table>
               </div>
@@ -779,7 +787,45 @@ export default function MilkTakenReportByProduct() {
               </div>
 
               {/* ── Close Button ── */}
-              <div className="flex justify-end px-6 py-3 border-t border-secondary-100 bg-secondary-50 flex-shrink-0">
+              <div className="flex justify-end gap-3 px-6 py-3 border-t border-secondary-100 bg-secondary-50 flex-shrink-0">
+                <Button
+                  onClick={() => {
+                    downloadReportAsExcel({
+                      title: 'Milk Taken Report For Bi-Product',
+                      metadata: [
+                        { label: 'Date', value: formatDate(viewRecord.date) }
+                      ],
+                      headers: [
+                        'Sr. No.', 'Product Name', 'Testing Time', 'Temp (°C)', 'OT',
+                        'Acidity (%)', 'Alcohol', 'FAT (%)', 'CLR', 'SNF (%)',
+                        'Neutralizer', 'Na / Electrolyte', 'pH'
+                      ],
+                      rows: [[
+                        1,
+                        viewRecord.product_name,
+                        viewRecord.testing_time ?? '—',
+                        viewRecord.temp_celsius ?? '—',
+                        viewRecord.ot ?? '—',
+                        viewRecord.acidity_percent ?? '—',
+                        viewRecord.alcohol_result ?? '—',
+                        viewRecord.fat_percent ?? '—',
+                        viewRecord.clr ?? '—',
+                        viewRecord.snf_percent ?? '—',
+                        viewRecord.neutralizer_adultration ?? '—',
+                        viewRecord.sodium_electrolyte_condition ?? '—',
+                        viewRecord.ph ?? '—'
+                      ]],
+                      signatures: {
+                        chemist: viewRecord.chemist_name,
+                        reviewer: viewRecord.qc_manager_name,
+                        reviewerTitle: 'QC Manager'
+                      }
+                    });
+                  }}
+                  className="bg-orange-600 hover:bg-orange-755 text-white font-medium shadow-sm transition-all"
+                >
+                  Download Excel
+                </Button>
                 <Button variant="outline" onClick={() => setViewRecord(null)}>Close</Button>
               </div>
             </Card>

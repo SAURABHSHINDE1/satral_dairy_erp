@@ -10,7 +10,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { buttermilkAnalysisRecordService } from '../services/buttermilkAnalysisRecord.service';
 import type { ButtermilkAnalysisRecord, ButtermilkAnalysisFormData } from '../types';
-import { formatDate } from '../lib/utils';
+import { formatDate, downloadReportAsExcel } from '../lib/utils';
 
 // ─── Preset Options ────────────────────────────────────────────────────────────
 const FLAVOUR_PRESETS = ['Plain', 'Salted', 'Masala', 'Jeera', '-'];
@@ -289,26 +289,45 @@ export default function ButtermilkAnalysisRecordPage() {
 
   const filteredRecords: ButtermilkAnalysisRecord[] = records?.data ?? [];
 
-  // ── CSV Export ───────────────────────────────────────────────────────────────
+  // ── Excel Export ──────────────────────────────────────────────────────────────
   const handleExport = () => {
-    const headers = [
-      'Date', 'Shift', 'Sample Type', 'Time', 'Batch No', 'Packing Date', 'Expiry Date',
-      'Flavour', 'Taste', 'Fat %', 'Degree', 'Acidity %', 'Protein %', 'Adulteration',
-      'Remark', 'Sign Name', 'Chemist', 'Quality Incharge'
-    ];
-    const csvRows = filteredRecords.map((r) => [
-      r.date, r.shift, r.type_of_sample, r.testing_time, r.batch_no, r.packing_date, r.expiry_date,
-      r.flavour, r.taste, r.fat_percent, r.degree, r.acidity_percent, r.protein_percent, r.adulteration,
-      r.remark, r.sign_name, r.chemist_name, r.quality_incharge_name
-    ]);
-    const csv = [headers, ...csvRows].map((row) => row.join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href     = url;
-    a.download = `buttermilk_analysis_${filterDate || 'all'}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadReportAsExcel({
+      title: 'Butter Milk Analysis Record',
+      metadata: [
+        { label: 'Export Date', value: formatDate(new Date()) },
+        { label: 'Filters', value: `Date: ${filterDate || 'All'}` },
+      ],
+      headers: [
+        'Sr. No.', 'Date', 'Shift', 'Type of Sample', 'Testing Time', 'Batch No.', 'Packing Date',
+        'Expiry Date', 'Flavour', 'Taste', 'Fat (%)', 'Degree', 'Acidity (%)', 'Protein (%)', 'Adulteration', 'Remark', 'Sign / Name', 'Chemist', 'Quality Incharge'
+      ],
+      rows: filteredRecords.map((r, i) => [
+        i + 1,
+        formatDate(r.date),
+        r.shift,
+        r.type_of_sample,
+        r.testing_time,
+        r.batch_no,
+        r.packing_date,
+        r.expiry_date,
+        r.flavour,
+        r.taste,
+        r.fat_percent,
+        r.degree,
+        r.acidity_percent,
+        r.protein_percent,
+        r.adulteration,
+        r.remark,
+        r.sign_name,
+        r.chemist_name,
+        r.quality_incharge_name
+      ]),
+      signatures: {
+        chemist: '',
+        reviewer: '',
+        reviewerTitle: 'Quality Incharge'
+      }
+    });
   };
 
   // ── Row Actions ──────────────────────────────────────────────────────────────
@@ -420,7 +439,7 @@ export default function ButtermilkAnalysisRecordPage() {
           </Button>
           {activeTab === 'records' && (
             <Button variant="outline" onClick={handleExport}>
-              <Download className="w-4 h-4 mr-2" />Export CSV
+              <Download className="w-4 h-4 mr-2" />Export Excel
             </Button>
           )}
         </div>
@@ -847,13 +866,6 @@ export default function ButtermilkAnalysisRecordPage() {
                         <td>{viewRecord.remark}</td>
                         <td>{viewRecord.sign_name}</td>
                       </tr>
-                      {/* Empty rows to match paper format */}
-                      {[...Array(3)].map((_, i) => (
-                        <tr key={i} className="h-8">
-                          <td className="text-center text-secondary-300">{i + 2}</td>
-                          {[...Array(14)].map((__, j) => <td key={j}>&nbsp;</td>)}
-                        </tr>
-                      ))}
                     </tbody>
                   </table>
                 </div>
@@ -880,7 +892,48 @@ export default function ButtermilkAnalysisRecordPage() {
                 </div>
 
                 {/* ── Close Button ── */}
-                <div className="flex justify-end px-6 py-3 border-t border-secondary-100 bg-secondary-50 flex-shrink-0">
+                <div className="flex justify-end gap-3 px-6 py-3 border-t border-secondary-100 bg-secondary-50 flex-shrink-0">
+                  <Button
+                    onClick={() => {
+                      downloadReportAsExcel({
+                        title: 'Butter Milk Analysis Record',
+                        metadata: [
+                          { label: 'Date', value: formatDate(viewRecord.date) },
+                          { label: 'Shift', value: viewRecord.shift },
+                        ],
+                        headers: [
+                          'Sr. No.', 'Type of Sample', 'Testing Time', 'Batch No.', 'Packing Date',
+                          'Expiry Date', 'Flavour', 'Taste', 'Fat (%)', 'Degree',
+                          'Acidity (%)', 'Protein (%)', 'Adulteration', 'Remark', 'Sign / Name'
+                        ],
+                        rows: [[
+                          1,
+                          viewRecord.type_of_sample,
+                          viewRecord.testing_time,
+                          viewRecord.batch_no,
+                          viewRecord.packing_date,
+                          viewRecord.expiry_date,
+                          viewRecord.flavour,
+                          viewRecord.taste,
+                          viewRecord.fat_percent,
+                          viewRecord.degree,
+                          viewRecord.acidity_percent,
+                          viewRecord.protein_percent,
+                          viewRecord.adulteration,
+                          viewRecord.remark,
+                          viewRecord.sign_name
+                        ]],
+                        signatures: {
+                          chemist: viewRecord.chemist_name,
+                          reviewer: viewRecord.quality_incharge_name,
+                          reviewerTitle: 'Quality Incharge'
+                        }
+                      });
+                    }}
+                    className="bg-indigo-600 hover:bg-indigo-755 text-white font-medium shadow-sm transition-all"
+                  >
+                    Download Excel
+                  </Button>
                   <Button variant="outline" onClick={() => setViewRecord(null)}>Close</Button>
                 </div>
               </Card>

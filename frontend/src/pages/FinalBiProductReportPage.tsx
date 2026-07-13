@@ -12,7 +12,7 @@ import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
 import { biProductService } from '../services/biProduct.service';
 import type { BiProductReport, BiProductFormData } from '../types';
-import { formatDate } from '../lib/utils';
+import { formatDate, downloadReportAsExcel } from '../lib/utils';
 import { useAuthStore } from '../store/auth.store';
 
 // ─── Product config — which fields are relevant per product ─────────────────
@@ -261,28 +261,45 @@ export default function FinalBiProductReportPage() {
     }
   };
 
-  // ── CSV Export ─────────────────────────────────────────────────────────────
+  // ── Excel Export ───────────────────────────────────────────────────────────
   const handleExport = () => {
-    const headers = [
-      'Date', 'Batch No', 'Product', 'Body/Structure', 'Sensory', 'Taste',
-      'Temp °C', 'Acidity %', 'pH', 'Self Life', 'FDM %', 'FAT %',
-      'TS %', 'Lassi Viscosity', 'Moisture %', 'Chemist', 'Quality Incharge',
-    ];
-    const csvRows = filteredRecords.map((r) => [
-      r.date, r.batch_no, r.product_name, r.body_structure ?? '',
-      r.sensory ?? '', r.taste ?? '',
-      r.temp_celsius ?? '', r.acidity_percent ?? '', r.ph ?? '',
-      r.self_life ?? '', r.fdm ?? '', r.fat_percent ?? '',
-      r.ts ?? '', r.lassi_viscosity ?? '', r.moisture ?? '',
-      r.chemist_name ?? '', r.quality_incharge_name ?? '',
-    ]);
-    const csv = [headers, ...csvRows].map((r) => r.join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `bi_product_report_${filterDate || 'all'}.csv`;
-    a.click();
+    downloadReportAsExcel({
+      title: 'Final Bi-Product Report',
+      metadata: [
+        { label: 'Export Date', value: formatDate(new Date()) },
+        { label: 'Filters', value: `Date: ${filterDate || 'All'}` },
+      ],
+      headers: [
+        'Sr. No.', 'Date', 'Batch No.', 'Product Name', 'Body / Structure', 'Sensory', 'Taste',
+        'Temp (°C)', 'Acidity (%)', 'pH', 'Self Life', 'FDM (%)', 'FAT (%)',
+        'T.S. (%)', 'Lassi Viscosity', 'Moisture (%)', 'Chemist', 'Quality Incharge'
+      ],
+      rows: filteredRecords.map((r, i) => [
+        i + 1,
+        formatDate(r.date),
+        r.batch_no,
+        r.product_name,
+        r.body_structure ?? '—',
+        r.sensory ?? '—',
+        r.taste ?? '—',
+        r.temp_celsius ?? '—',
+        r.acidity_percent ?? '—',
+        r.ph ?? '—',
+        r.self_life ?? '—',
+        r.fdm ?? '—',
+        r.fat_percent ?? '—',
+        r.ts ?? '—',
+        r.lassi_viscosity ?? '—',
+        r.moisture ?? '—',
+        r.chemist_name ?? '—',
+        r.quality_incharge_name ?? '—'
+      ]),
+      signatures: {
+        chemist: '',
+        reviewer: '',
+        reviewerTitle: 'Quality Incharge'
+      }
+    });
   };
 
   // ── Product badge color ────────────────────────────────────────────────────
@@ -317,7 +334,7 @@ export default function FinalBiProductReportPage() {
             <RefreshCw className="w-4 h-4 mr-2" />Refresh
           </Button>
           <Button variant="outline" onClick={handleExport}>
-            <Download className="w-4 h-4 mr-2" />Export CSV
+            <Download className="w-4 h-4 mr-2" />Export Excel
           </Button>
         </div>
       </div>
@@ -838,13 +855,6 @@ export default function FinalBiProductReportPage() {
                       <td>{viewRecord.lassi_viscosity?.toFixed(2) ?? '—'}</td>
                       <td>{viewRecord.moisture?.toFixed(2) ?? '—'}</td>
                     </tr>
-                    {/* Empty rows to match paper format */}
-                    {[...Array(3)].map((_, i) => (
-                      <tr key={i} className="h-8">
-                        <td className="text-center text-secondary-300">{i + 2}</td>
-                        {[...Array(13)].map((__, j) => <td key={j}>&nbsp;</td>)}
-                      </tr>
-                    ))}
                   </tbody>
                 </table>
               </div>
@@ -871,7 +881,47 @@ export default function FinalBiProductReportPage() {
               </div>
 
               {/* ── Close Button ── */}
-              <div className="flex justify-end px-6 py-3 border-t border-secondary-100 bg-secondary-50 flex-shrink-0">
+              <div className="flex justify-end gap-3 px-6 py-3 border-t border-secondary-100 bg-secondary-50 flex-shrink-0">
+                <Button
+                  onClick={() => {
+                    downloadReportAsExcel({
+                      title: 'Final Bi-Product Report',
+                      metadata: [
+                        { label: 'Date', value: formatDate(viewRecord.date) },
+                        { label: 'Batch No', value: viewRecord.batch_no },
+                      ],
+                      headers: [
+                        'Sr. No.', 'Product Name', 'Body / Structure', 'Sensory', 'Taste',
+                        'Temp (°C)', 'Acidity (%)', 'pH', 'Self Life', 'FDM (%)', 'FAT (%)',
+                        'T.S. (%)', 'Lassi Viscosity', 'Moisture (%)'
+                      ],
+                      rows: [[
+                        1,
+                        viewRecord.product_name,
+                        viewRecord.body_structure ?? '—',
+                        viewRecord.sensory ?? '—',
+                        viewRecord.taste ?? '—',
+                        viewRecord.temp_celsius ?? '—',
+                        viewRecord.acidity_percent ?? '—',
+                        viewRecord.ph ?? '—',
+                        viewRecord.self_life ?? '—',
+                        viewRecord.fdm ?? '—',
+                        viewRecord.fat_percent ?? '—',
+                        viewRecord.ts ?? '—',
+                        viewRecord.lassi_viscosity ?? '—',
+                        viewRecord.moisture ?? '—'
+                      ]],
+                      signatures: {
+                        chemist: viewRecord.chemist_name,
+                        reviewer: viewRecord.quality_incharge_name,
+                        reviewerTitle: 'Quality Incharge'
+                      }
+                    });
+                  }}
+                  className="bg-violet-600 hover:bg-violet-750 text-white font-medium shadow-sm transition-all"
+                >
+                  Download Excel
+                </Button>
                 <Button variant="outline" onClick={() => setViewRecord(null)}>Close</Button>
               </div>
             </Card>
