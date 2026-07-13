@@ -16,16 +16,20 @@ app.use(helmet());
 //   origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
 //   credentials: true
 // }));
+
+
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://satral-dairy-3pg77gbmg-saurabhshinde779845-gmailcoms-projects.vercel.app'
-];
+  'https://satral-dairy-erp.vercel.app',
+  // process.env.FRONTEND_URL
+].filter(Boolean);
 
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.log('Blocked by CORS:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
