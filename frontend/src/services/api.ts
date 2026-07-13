@@ -1,8 +1,11 @@
 import axios, { AxiosError, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
 import { useAuthStore } from '../store/auth.store';
 
+const apiURL = import.meta.env.VITE_API_URL || '';
+const cleanApiURL = apiURL.endsWith('/') ? apiURL.slice(0, -1) : apiURL;
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: cleanApiURL ? `${cleanApiURL}/api` : '/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -39,7 +42,7 @@ api.interceptors.response.use(
         console.log('[API Interceptor] 401 encountered. Refresh token present:', !!refreshToken);
         if (refreshToken) {
           console.log('[API Interceptor] Attempting token refresh...');
-          const response = await axios.post('/api/auth/refresh', {
+          const response = await axios.post(`${cleanApiURL ? cleanApiURL : ''}/api/auth/refresh`, {
             refreshToken,
           });
 
