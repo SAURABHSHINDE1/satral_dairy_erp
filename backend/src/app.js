@@ -12,11 +12,25 @@ const app = express();
 
 // Security middleware
 app.use(helmet());
+// app.use(cors({
+//   origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+//   credentials: true
+// }));
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://satral-dairy-3pg77gbmg-saurabhshinde779845-gmailcoms-projects.vercel.app'
+];
+
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
-
 // Rate limiting
 const limiter = createRateLimiter();
 app.use('/api', limiter);
