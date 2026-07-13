@@ -62,7 +62,7 @@ export function downloadReportAsExcel({
   metadata: { label: string; value: string }[];
   headers: string[];
   rows: any[][];
-  signatures: { chemist: string; reviewer: string; reviewerTitle?: string };
+  signatures: { chemist?: string | null; reviewer?: string | null; reviewerTitle?: string };
 }) {
   const metaHtml = metadata
     .map(m => `<tr><td style="font-weight:bold; font-size:11px; padding: 2px;">${m.label}:</td><td style="font-size:11px; padding: 2px;">${m.value}</td></tr>`)
